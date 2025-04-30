@@ -4,7 +4,7 @@ import pandas as pd
 import pingouin as pg
 from statsmodels.stats.inter_rater import fleiss_kappa
 
-with open('test.json', 'r') as f:
+with open('anno.json', 'r', encoding='utf-8') as f:
     data = json.load(f)
 
 content_groups = defaultdict(list)
