@@ -1,0 +1,115 @@
+Fleiss' Kappa for story_class: 0.612
+ICC(3,k) for curiosity: 0.673
+ICC(3,k) for surprise: 0.703
+ICC(3,k) for suspense: 0.720
+
+Annotators: ['Jelmer', 'Martijn', 'Matthijs', 'Shaya']
+
+==== Pairwise Cohen's Kappa for story_class ====
+Jelmer vs Martijn: 0.419
+Jelmer vs Matthijs: 0.399
+Jelmer vs Shaya: 0.386
+
+Martijn vs Jelmer: 0.419
+Martijn vs Matthijs: 0.896
+Martijn vs Shaya: 0.864
+
+Matthijs vs Jelmer: 0.399
+Matthijs vs Martijn: 0.896
+Matthijs vs Shaya: 0.848
+
+Shaya vs Jelmer: 0.386
+Shaya vs Martijn: 0.864
+Shaya vs Matthijs: 0.848
+
+==== Pairwise correlations for curiosity ====
+Jelmer vs Martijn: Pearson r=0.235 (p=0.000), Spearman rho=0.224 (p=0.000)
+Jelmer vs Matthijs: Pearson r=0.391 (p=0.000), Spearman rho=0.380 (p=0.000)
+Jelmer vs Shaya: Pearson r=0.275 (p=0.000), Spearman rho=0.269 (p=0.000)
+
+Martijn vs Jelmer: Pearson r=0.235 (p=0.000), Spearman rho=0.224 (p=0.000)
+Martijn vs Matthijs: Pearson r=0.309 (p=0.000), Spearman rho=0.306 (p=0.000)
+Martijn vs Shaya: Pearson r=0.433 (p=0.000), Spearman rho=0.437 (p=0.000)
+
+Matthijs vs Jelmer: Pearson r=0.391 (p=0.000), Spearman rho=0.380 (p=0.000)
+Matthijs vs Martijn: Pearson r=0.309 (p=0.000), Spearman rho=0.306 (p=0.000)
+Matthijs vs Shaya: Pearson r=0.410 (p=0.000), Spearman rho=0.410 (p=0.000)
+
+Shaya vs Jelmer: Pearson r=0.275 (p=0.000), Spearman rho=0.269 (p=0.000)
+Shaya vs Martijn: Pearson r=0.433 (p=0.000), Spearman rho=0.437 (p=0.000)
+Shaya vs Matthijs: Pearson r=0.410 (p=0.000), Spearman rho=0.410 (p=0.000)
+
+==== Pairwise correlations for surprise ====
+Jelmer vs Martijn: Pearson r=0.259 (p=0.000), Spearman rho=0.250 (p=0.000)
+Jelmer vs Matthijs: Pearson r=0.276 (p=0.000), Spearman rho=0.293 (p=0.000)
+Jelmer vs Shaya: Pearson r=0.323 (p=0.000), Spearman rho=0.320 (p=0.000)
+
+Martijn vs Jelmer: Pearson r=0.259 (p=0.000), Spearman rho=0.250 (p=0.000)
+Martijn vs Matthijs: Pearson r=0.414 (p=0.000), Spearman rho=0.429 (p=0.000)
+Martijn vs Shaya: Pearson r=0.571 (p=0.000), Spearman rho=0.577 (p=0.000)
+
+Matthijs vs Jelmer: Pearson r=0.276 (p=0.000), Spearman rho=0.293 (p=0.000)
+Matthijs vs Martijn: Pearson r=0.414 (p=0.000), Spearman rho=0.429 (p=0.000)
+Matthijs vs Shaya: Pearson r=0.368 (p=0.000), Spearman rho=0.375 (p=0.000)
+
+Shaya vs Jelmer: Pearson r=0.323 (p=0.000), Spearman rho=0.320 (p=0.000)
+Shaya vs Martijn: Pearson r=0.571 (p=0.000), Spearman rho=0.577 (p=0.000)
+Shaya vs Matthijs: Pearson r=0.368 (p=0.000), Spearman rho=0.375 (p=0.000)
+
+==== Pairwise correlations for suspense ====
+Jelmer vs Martijn: Pearson r=0.275 (p=0.000), Spearman rho=0.285 (p=0.000)
+Jelmer vs Matthijs: Pearson r=0.347 (p=0.000), Spearman rho=0.354 (p=0.000)
+Jelmer vs Shaya: Pearson r=0.334 (p=0.000), Spearman rho=0.359 (p=0.000)
+
+Martijn vs Jelmer: Pearson r=0.275 (p=0.000), Spearman rho=0.285 (p=0.000)
+Martijn vs Matthijs: Pearson r=0.361 (p=0.000), Spearman rho=0.366 (p=0.000)
+Martijn vs Shaya: Pearson r=0.529 (p=0.000), Spearman rho=0.521 (p=0.000)
+
+Matthijs vs Jelmer: Pearson r=0.347 (p=0.000), Spearman rho=0.354 (p=0.000)
+Matthijs vs Martijn: Pearson r=0.361 (p=0.000), Spearman rho=0.366 (p=0.000)
+Matthijs vs Shaya: Pearson r=0.505 (p=0.000), Spearman rho=0.519 (p=0.000)
+
+Shaya vs Jelmer: Pearson r=0.334 (p=0.000), Spearman rho=0.359 (p=0.000)
+Shaya vs Martijn: Pearson r=0.529 (p=0.000), Spearman rho=0.521 (p=0.000)
+Shaya vs Matthijs: Pearson r=0.505 (p=0.000), Spearman rho=0.519 (p=0.000)
+
+==== Annotator Rating Patterns ====
+Annotator  Story%  curiosity  surprise  suspense
+   Jelmer   29.52       2.84      2.59      2.57
+  Martijn   60.00       2.97      3.04      2.38
+ Matthijs   58.87       2.57      2.09      2.44
+    Shaya   61.94       2.67      2.59      2.38
+
+==== Content Items with High Disagreement ====
+
+Top disagreements for story_class:
+               content  story_class
+t1_ca24zer  t1_ca24zer       0.1875
+t1_ceprovz  t1_ceprovz       0.1875
+t1_cepre6f  t1_cepre6f       0.1875
+t1_ch33rrs  t1_ch33rrs       0.1875
+t1_c9d39gw  t1_c9d39gw       0.1875
+
+Top disagreements for curiosity:
+               content  curiosity
+t3_242qn0    t3_242qn0     2.7500
+t1_ckydk5a  t1_ckydk5a     2.7500
+t1_cbdodgh  t1_cbdodgh     2.6875
+t1_cgxlked  t1_cgxlked     2.2500
+t1_cat7r28  t1_cat7r28     2.2500
+
+Top disagreements for surprise:
+               content  surprise
+t3_242qn0    t3_242qn0    4.0000
+t1_cpra9u0  t1_cpra9u0    3.1875
+t1_cauc7tb  t1_cauc7tb    3.1875
+t1_ceprjui  t1_ceprjui    3.1875
+t1_cstvpcf  t1_cstvpcf    3.1875
+
+Top disagreements for suspense:
+               content  suspense
+t3_242qn0    t3_242qn0    4.0000
+t1_c95qp1r  t1_c95qp1r    3.1875
+t1_cgxtaif  t1_cgxtaif    3.0000
+t1_ckydk5a  t1_ckydk5a    2.7500
+t1_cav4ico  t1_cav4ico    2.6875

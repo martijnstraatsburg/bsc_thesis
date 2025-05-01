@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import json
 from collections import defaultdict
 import pandas as pd
@@ -9,7 +10,7 @@ from scipy.stats import pearsonr, spearmanr
 from sklearn.metrics import cohen_kappa_score
 
 # Load the annotation data
-with open('test-anno.json', 'r', encoding='utf-8') as f:
+with open('with-names-annotations.json', 'r', encoding='utf-8') as f:
     data = json.load(f)
 
 # ===== Original Agreement Analysis =====

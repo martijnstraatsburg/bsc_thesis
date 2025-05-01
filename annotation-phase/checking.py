@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import json
 
 # Load the JSON file with UTF-8 encoding
