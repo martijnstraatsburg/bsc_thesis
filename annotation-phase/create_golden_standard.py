@@ -1,4 +1,13 @@
 #!/usr/bin/env python3
+
+# Name: create_golden_standard.py
+# Author: Martijn Straatsburg
+# Description: This script generates a golden-standard JSON file from multiple annotator data.
+# It calculates the majority vote for story classification and the median for suspense, curiosity, and surprise ratings.
+# It also handles the input and output file paths through command-line arguments.
+# Usage: python create_golden_standard.py <input_json> <output_json>
+# Example: python create_golden_standard.py anno.json golden-standard.json
+
 import json
 import argparse
 from collections import Counter

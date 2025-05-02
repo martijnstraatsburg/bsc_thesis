@@ -1,4 +1,11 @@
 #!/usr/bin/env python3
+
+# Name: detailed_iaa.py
+# Author: Martijn Straatsburg
+# Description: This script performs detailed inter-annotator agreement analysis.
+# It calculates Fleiss' Kappa for story classification, ICC for numeric ratings, and pairwise Cohen's Kappa and correlations for multiple annotators.
+# It also visualizes the results and identifies content items with high disagreement.
+
 import json
 from collections import defaultdict
 import pandas as pd
@@ -9,17 +16,13 @@ import matplotlib.pyplot as plt
 from scipy.stats import pearsonr, spearmanr
 from sklearn.metrics import cohen_kappa_score
 
-# Load the annotation data
-with open('with-names-annotations.json', 'r', encoding='utf-8') as f:
+with open('names-annotations.json', 'r', encoding='utf-8') as f:
     data = json.load(f)
 
-# ===== Original Agreement Analysis =====
-# Group annotations by content name
 content_groups = defaultdict(list)
 for entry in data:
     content_groups[entry['name']].append(entry)
 
-# Calculate Fleiss' Kappa for story_class
 fleiss_data = []
 for name, entries in content_groups.items():
     story_counts = {'Story': 0, 'Not Story': 0}
@@ -33,7 +36,6 @@ for name, entries in content_groups.items():
 kappa = fleiss_kappa(fleiss_data)
 print(f"Fleiss' Kappa for story_class: {kappa:.3f}")
 
-# Function to prepare data for ICC calculation
 def prepare_icc_data(entries, rating_key):
     icc_data = []
     for entry in entries:
@@ -43,7 +45,6 @@ def prepare_icc_data(entries, rating_key):
         icc_data.append({'target': name, 'rater': annotator, 'rating': rating})
     return pd.DataFrame(icc_data)
 
-# Calculate ICC for each perception category
 categories = ['curiosity', 'surprise', 'suspense']
 results = {}
 
@@ -54,13 +55,12 @@ for category in categories:
     results[category] = icc_value
     print(f"ICC(3,k) for {category}: {icc_value:.3f}")
 
-# ===== New Pairwise Annotator Comparisons =====
 
-# 1. Identify all unique annotators
+# All unique annotators
 annotators = sorted(list(set([entry['annotator'] for entry in data])))
 print(f"\nAnnotators: {annotators}")
 
-# 2. Create a structured DataFrame with all annotations
+# DF with all annotations
 structured_data = []
 for entry in data:
     item = {
@@ -69,7 +69,6 @@ for entry in data:
         'story_class': 1 if entry['story_class'] == 'Story' else 0
     }
     
-    # Add ratings for each category
     for category in categories:
         item[category] = entry[category][0]['rating']
         
@@ -77,21 +76,18 @@ for entry in data:
 
 df_annotations = pd.DataFrame(structured_data)
 
-# 3. Pairwise Cohen's Kappa for story_class
-print("\n==== Pairwise Cohen's Kappa for story_class ====")
+# Cohen's Kappa for story_class
+print("\n==== Cohen's Kappa for story_class ====")
 kappa_matrix = np.zeros((len(annotators), len(annotators)))
 
 for i, anno1 in enumerate(annotators):
     for j, anno2 in enumerate(annotators):
         if i == j:
-            kappa_matrix[i, j] = 1.0  # Perfect agreement with self
+            kappa_matrix[i, j] = 1.0
             continue
-            
-        # Get annotations from both annotators
+
         df1 = df_annotations[df_annotations['annotator'] == anno1]
         df2 = df_annotations[df_annotations['annotator'] == anno2]
-        
-        # Merge on content name to get paired annotations
         merged = pd.merge(
             df1[['name', 'story_class']], 
             df2[['name', 'story_class']], 
@@ -100,7 +96,6 @@ for i, anno1 in enumerate(annotators):
         )
         
         if len(merged) > 0:
-            # Calculate Cohen's Kappa for this pair
             kappa = cohen_kappa_score(
                 merged['story_class_1'].values,
                 merged['story_class_2'].values
@@ -108,7 +103,7 @@ for i, anno1 in enumerate(annotators):
             kappa_matrix[i, j] = kappa
             print(f"{anno1} vs {anno2}: {kappa:.3f}")
 
-# 4. Pairwise correlation for numeric ratings
+# Pairwise correlation for ratings
 correlation_results = {}
 
 for category in categories:
@@ -119,24 +114,19 @@ for category in categories:
     for i, anno1 in enumerate(annotators):
         for j, anno2 in enumerate(annotators):
             if i == j:
-                pearson_matrix[i, j] = 1.0  # Perfect correlation with self
+                pearson_matrix[i, j] = 1.0
                 spearman_matrix[i, j] = 1.0
                 continue
-                
-            # Get ratings from both annotators
+
             df1 = df_annotations[df_annotations['annotator'] == anno1]
             df2 = df_annotations[df_annotations['annotator'] == anno2]
-            
-            # Merge on content name to get paired ratings
             merged = pd.merge(
                 df1[['name', category]], 
                 df2[['name', category]], 
                 on='name', 
                 suffixes=('_1', '_2')
             )
-            
             if len(merged) > 0:
-                # Calculate correlations
                 pearson, p_val_p = pearsonr(merged[f'{category}_1'], merged[f'{category}_2'])
                 spearman, p_val_s = spearmanr(merged[f'{category}_1'], merged[f'{category}_2'])
                 
@@ -150,11 +140,10 @@ for category in categories:
         'spearman': spearman_matrix
     }
 
-# 5. Visualize the pairwise agreement matrices
+# Simple visualisations of pairwise results
 fig, axes = plt.subplots(2, 2, figsize=(15, 12))
 fig.suptitle('Pairwise Annotator Agreement', fontsize=16)
 
-# Plot Cohen's Kappa for story_class
 im0 = axes[0, 0].imshow(kappa_matrix, cmap='viridis', vmin=-1, vmax=1)
 axes[0, 0].set_title("Cohen's Kappa for 'story_class'")
 axes[0, 0].set_xticks(range(len(annotators)))
@@ -163,7 +152,6 @@ axes[0, 0].set_xticklabels(annotators)
 axes[0, 0].set_yticklabels(annotators)
 fig.colorbar(im0, ax=axes[0, 0])
 
-# Plot correlation matrices for the first category
 category = categories[0]
 im1 = axes[0, 1].imshow(correlation_results[category]['pearson'], cmap='viridis', vmin=-1, vmax=1)
 axes[0, 1].set_title(f"Pearson r for '{category}'")
@@ -173,7 +161,6 @@ axes[0, 1].set_xticklabels(annotators)
 axes[0, 1].set_yticklabels(annotators)
 fig.colorbar(im1, ax=axes[0, 1])
 
-# Plot correlation matrices for the second category
 category = categories[1]
 im2 = axes[1, 0].imshow(correlation_results[category]['pearson'], cmap='viridis', vmin=-1, vmax=1)
 axes[1, 0].set_title(f"Pearson r for '{category}'")
@@ -183,7 +170,6 @@ axes[1, 0].set_xticklabels(annotators)
 axes[1, 0].set_yticklabels(annotators)
 fig.colorbar(im2, ax=axes[1, 0])
 
-# Plot correlation matrices for the third category
 category = categories[2]
 im3 = axes[1, 1].imshow(correlation_results[category]['pearson'], cmap='viridis', vmin=-1, vmax=1)
 axes[1, 1].set_title(f"Pearson r for '{category}'")
@@ -197,35 +183,27 @@ plt.tight_layout(rect=[0, 0, 1, 0.95])
 plt.savefig('annotator_agreement.png')
 plt.close()
 
-# 6. Calculate annotator bias and rating distributions
+# Annotator bias and rating patterns
 print("\n==== Annotator Rating Patterns ====")
 annotator_stats = pd.DataFrame(columns=['Annotator', 'Story%'] + categories)
 
 for i, anno in enumerate(annotators):
     anno_data = df_annotations[df_annotations['annotator'] == anno]
-    
-    # Calculate percentage of "Story" classifications
     story_percent = (anno_data['story_class'].mean() * 100)
-    
-    # Get mean ratings for each category
     category_means = [anno_data[cat].mean() for cat in categories]
-    
-    # Add to DataFrame
     annotator_stats.loc[i] = [anno, story_percent] + category_means
 
 print(annotator_stats.to_string(index=False, float_format="%.2f"))
 
-# 7. Visualize rating distributions by annotator
+# Simple distributions visualisations
 fig, axes = plt.subplots(2, 2, figsize=(15, 12))
 fig.suptitle('Rating Distributions by Annotator', fontsize=16)
 
-# Plot story class percentages
 axes[0, 0].bar(annotators, annotator_stats['Story%'])
 axes[0, 0].set_title("Percentage of 'Story' Classifications")
 axes[0, 0].set_ylabel("Percentage")
 axes[0, 0].set_ylim(0, 100)
 
-# Plot mean ratings for each category
 for i, category in enumerate(categories):
     axes[(i+1)//2, (i+1)%2].bar(annotators, annotator_stats[category])
     axes[(i+1)//2, (i+1)%2].set_title(f"Mean {category.capitalize()} Ratings")
@@ -236,25 +214,17 @@ plt.tight_layout(rect=[0, 0, 1, 0.95])
 plt.savefig('annotator_distributions.png')
 plt.close()
 
-# 8. Identify specific content items with high disagreement
+# Highlighting high disagreement cases and variance
 print("\n==== Content Items with High Disagreement ====")
-
-# Calculate variance in ratings across annotators for each content item
 content_variance = defaultdict(dict)
-
 for name in content_groups:
     entries = content_groups[name]
-    
-    # Calculate variance in story_class
     story_values = [1 if entry['story_class'] == 'Story' else 0 for entry in entries]
     content_variance[name]['story_class'] = np.var(story_values)
-    
-    # Calculate variance in ratings for each category
     for category in categories:
         ratings = [entry[category][0]['rating'] for entry in entries]
         content_variance[name][category] = np.var(ratings)
 
-# Convert to DataFrame for easier analysis
 df_variance = pd.DataFrame.from_dict(content_variance, orient='index')
 df_variance['content'] = df_variance.index
 df_variance = df_variance.sort_values('story_class', ascending=False)
@@ -267,5 +237,4 @@ for category in categories:
     temp_df = df_variance.sort_values(category, ascending=False)
     print(temp_df[['content', category]].head(5))
 
-# Save the variance data to a CSV for further analysis
 df_variance.to_csv('content_disagreement.csv')
