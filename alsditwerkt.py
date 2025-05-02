@@ -455,7 +455,7 @@ def run_evaluation(gold_standard_file: str, results_dir: str, output_dir: str = 
 
 if __name__ == "__main__":
     # Example usage
-    gold_standard_file = "small_gold_standard.json"
+    gold_standard_file = "gs-train.json"
     results_dir = "llm_analysis_results"
     output_dir = "evaluation_results"
     

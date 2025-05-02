@@ -23,27 +23,51 @@ class PostAnalyser:
     def _create_system_prompt(self) -> str:
         """Create the system prompt with persona and instructions."""
         base = """You are an expert linguist specializing in narrative analysis and text classification.
-        
-You will classify ONE input passage at a time, in JSON, according to the following scheme.
+
+You will classify ONE input passage at a time using the codebook definitions, providing your analysis in valid JSON format.
+
 1) STORY VS. NOT STORY
-Use the Codebook's constructivist definition of a story:
-- A story describes a sequence of connected events involving one or more specific characters (people, animals, etc.).
-- Events are singular occurrences in time ("he opened the door"; "she was astonished"), and must form a coherent, causally or temporally ordered chain.
+A passage contains a story if it meets ALL these criteria:
+- Describes a sequence of events involving one or more specific characters (people, animals, etc.)
+- Contains multiple, specific events that are sequential (one happens, then another)
+- Events are connected (about same people, causally linked, or describing a transformation)
+- Events are "singular occurrences at particular places and times"
 
-2) READERS' PERCEPTION RATINGS (1-5 Likert)
-Based on Sternberg's narrative universals, rate:
-  • SUSPENSE - "Triggers desire for information about future events, postpones a feeling of resolution."
-  • CURIOSITY - "Triggers desire for information about past events, leaves me wondering about missing information."
-  • SURPRISE - "Presents information that I experience as unexpected."
+NON-STORIES include:
+- Jumbles of unordered/unconnected events
+- General, repeating, isolated, or hypothetical situations without a story-like sequence
+- Text that merely references or discusses stories without narrating them
+- Lists of examples without narrative progression
 
-You MUST follow this process in your analysis:
-1. Read the passage fully.
-2. Decide whether the passage contains a story or not (Story vs. Not Story (use the Codebook)).
-3. Rate Suspense (future information) 1-5. Ensure the rating is an integer between 1 and 5.
-4. Rate Curiosity (past information) 1-5. Ensure the rating is an integer between 1 and 5.
-5. Rate Surprise (unexpected information) 1-5. Ensure the rating is an integer between 1 and 5.
+2) READERS' PERCEPTION RATINGS (1-5 Likert scale)
+Based on Sternberg's narrative universals:
 
-Your response MUST be valid JSON with the following structure:
+SUSPENSE (future information gap)
+"This passage triggers a desire for information about future events and postpones a feeling of resolution."
+- 1: No information gaps about future events
+- 3: Some suspended information about upcoming events
+- 5: Strong desire to know future outcomes with significant postponement
+
+CURIOSITY (past information gap)
+"This passage triggers a desire for information about past events and leaves me wondering about missing information."
+- 1: No questions about past events or backstory
+- 3: Some questions about what happened previously
+- 5: Strong desire to know critical missing past information
+
+SURPRISE (unexpected information)
+"This passage presents information that I experience as unexpected."
+- 1: All information follows logically, nothing unexpected
+- 3: Some moderately unexpected elements
+- 5: Highly unexpected revelations that challenge previous understanding
+
+ANALYSIS PROCESS:
+1. Read the passage completely and carefully.
+2. Identify events and determine if they form a connected sequence with specific characters.
+3. Decide if the passage contains a story according to the criteria above.
+4. Rate each readers' perception (suspense, curiosity, surprise) on the 1-5 scale.
+5. Format your response in the required JSON structure.
+
+Your response MUST be valid JSON with EXACTLY this structure:
 {
   "story_class": "Story" or "Not Story",
   "suspense": integer (1-5),
@@ -55,108 +79,108 @@ Your response MUST be valid JSON with the following structure:
             "one": """```json
             [
                 {
-                    "body": "...",
+                    "body": "I attempted to kill myself, once. I failed.\n\nI have only told a few of my closest friends, and random people on the Internet who can't ID me.\n\nIncompetence is not insincerity. Were it not for a timely couple of talks from some amazing people, I would have gone ahead with my Mark II plan, which was substantially more lethal, and I would not be here.",
                     "story_class": "Story",
                     "suspense": 4,
-                    "curiosity": 3,
-                    "surprise": 5
+                    "curiosity": 5,
+                    "surprise": 4
                 }
             ]
             ```""",
             "few": """```json
             [
                 {
-                    "body": "...",
+                    "body": "I attempted to kill myself, once. I failed.\n\nI have only told a few of my closest friends, and random people on the Internet who can't ID me.\n\nIncompetence is not insincerity. Were it not for a timely couple of talks from some amazing people, I would have gone ahead with my Mark II plan, which was substantially more lethal, and I would not be here.",
                     "story_class": "Story",
                     "suspense": 4,
-                    "curiosity": 3,
-                    "surprise": 5
+                    "curiosity": 5,
+                    "surprise": 4
                 },
                 {
-                    "body": "...",
+                    "body": "Sort of. The *general* phenomenon that describes the tendency for people to be attracted to similar-looking people doesn't have a specific term, it's just one factor among many that determines attraction. An informal naming of it would be \"like-attracts-like\", as Wikipedia describes it.\n\nA more specific idea within this idea does have a term: [Matching Hypothesis](http://en.wikipedia.org/wiki/Matching_hypothesis), which focuses on one's attraction to someone who is just as socially desirable as one's self.",
                     "story_class": "Not Story",
                     "suspense": 1,
                     "curiosity": 2,
-                    "surprise": 1
+                    "surprise": 2
                 },
                 {
-                    "body": "...",
+                    "body": "As someone who has parked illegally a few times, I was not aware that it was not legal to park there because I had always parked there at night. Once I found out, I moved my car.\n\nVandalism should never be \"okay\", especially since you can just call a tow truck and have it moved. If you want to mess up someone's car, it's unlikely you'll ever be caught. Just do it and stop trying to morally justify it.\n\ntl;dr: Don't always assume someone is just being a malicious dick, and don't retaliate.",
                     "story_class": "Story",
-                    "suspense": 5,
-                    "curiosity": 4,
-                    "surprise": 3
+                    "suspense": 3,
+                    "curiosity": 2,
+                    "surprise": 4
                 }
             ]
             ```""",
             "multi": """```json
             [
                 {
-                    "body": "...",
+                    "body": "I attempted to kill myself, once. I failed.\n\nI have only told a few of my closest friends, and random people on the Internet who can't ID me.\n\nIncompetence is not insincerity. Were it not for a timely couple of talks from some amazing people, I would have gone ahead with my Mark II plan, which was substantially more lethal, and I would not be here.",
                     "story_class": "Story",
                     "suspense": 4,
-                    "curiosity": 3,
-                    "surprise": 5
-                },
-                {
-                    "body": "...",
-                    "story_class": "Not Story",
-                    "suspense": 1,
-                    "curiosity": 2,
-                    "surprise": 1
-                },
-                {
-                    "body": "...",
-                    "story_class": "Story",
-                    "suspense": 5,
-                    "curiosity": 4,
-                    "surprise": 3
-                },
-                {
-                    "body": "...",
-                    "story_class": "Not Story",
-                    "suspense": 2,
-                    "curiosity": 1,
-                    "surprise": 2
-                },
-                {
-                    "body": "...",
-                    "story_class": "Story",
-                    "suspense": 3,
                     "curiosity": 5,
                     "surprise": 4
                 },
                 {
-                    "body": "...",
+                    "body": "Sort of. The *general* phenomenon that describes the tendency for people to be attracted to similar-looking people doesn't have a specific term, it's just one factor among many that determines attraction. An informal naming of it would be \"like-attracts-like\", as Wikipedia describes it.\n\nA more specific idea within this idea does have a term: [Matching Hypothesis](http://en.wikipedia.org/wiki/Matching_hypothesis), which focuses on one's attraction to someone who is just as socially desirable as one's self.",
                     "story_class": "Not Story",
                     "suspense": 1,
                     "curiosity": 2,
-                    "surprise": 1
+                    "surprise": 2
                 },
                 {
-                    "body": "...",
+                    "body": "As someone who has parked illegally a few times, I was not aware that it was not legal to park there because I had always parked there at night. Once I found out, I moved my car.\n\nVandalism should never be \"okay\", especially since you can just call a tow truck and have it moved. If you want to mess up someone's car, it's unlikely you'll ever be caught. Just do it and stop trying to morally justify it.\n\ntl;dr: Don't always assume someone is just being a malicious dick, and don't retaliate.",
                     "story_class": "Story",
-                    "suspense": 4,
+                    "suspense": 3,
+                    "curiosity": 2,
+                    "surprise": 4
+                },
+                {
+                    "body": "What? He doesn't overreact in the sligh--POCKET SAND!",
+                    "story_class": "Not Story",
+                    "suspense": 1,
                     "curiosity": 3,
                     "surprise": 5
                 },
                 {
-                    "body": "...",
+                    "body": "Zunes were never cool. CMV.\n\nLet's face it: Zune (the media delivery service, the actual device) was just a blatant attempt by Microsoft to compete and stay relevant when faced with an ascendant Apple. I'm by no means an Apple fanboy, but nothing is less cool than copying wholesale what is currently popular. The mp3 players looked bad, the sites were godawful, and Zune is generally considered to be emblematic of the tack the Microsoft has taken to compete with Apple, which hasn't been great. \"Leasing\" songs to your Zune-having friends was two steps forward idea-wise, but 3 steps back CRM-wise. Watching the build up and \"hype\" to the release of Zune was like watching a car crash in slow motion.\n\nI'm not saying that Zune was useless or uninteresting or ineffective, my view is simply that it isn't, and never was, cool. Hip. Desirable to have. You will have changed my view when you make me (or some past version of me) desire a Zune.",
+                    "story_class": "Story",
+                    "suspense": 2,
+                    "curiosity": 4,
+                    "surprise": 2
+                },
+                {
+                    "body": "so he *did* kill himself",
                     "story_class": "Not Story",
                     "suspense": 1,
+                    "curiosity": 3,
+                    "surprise": 4
+                },
+                {
+                    "body": "Oh yeah, Zodd did beat him once.\n\nThat random commander too, but only because his sword broke.\n\nGood memory.",
+                    "story_class": "Story",
+                    "suspense": 1,
                     "curiosity": 2,
-                    "surprise": 1
+                    "surprise": 2
+                },
+                {
+                    "body": "There is a surprisingly large number of people who actually believe that Courtney Love orchestrated his death. I can't really link anything cause I'm on mobile but the conspiracy theory is huge if you just google it. There's entire books and documentaries dedicated to it.",
+                    "story_class": "Not Story",
+                    "suspense": 2,
+                    "curiosity": 4,
+                    "surprise": 3
                 }
             ]
             ```"""
         }
         if self.shot == "zero":
-            return base + "\n\nDo not include any text outside of this JSON format. Ensure your response is valid JSON. Ensure the ratings are integers (1-5)."
+            return base + "\n\nDo not include any explanatory text outside of this JSON format. Ensure all ratings are integers between 1 and 5."
         else:
             return (
                 base
                 + "\n\n" + "EXAMPLES:\n\n" +
                 examples[self.shot] + "\n\n" +
-                "Do not include any text outside of this JSON format. Ensure your response is valid JSON. Ensure the ratings are integers (1-5)."
+                "Do not include any explanatory text outside of this JSON format. Ensure all ratings are integers between 1 and 5."
             )
 
     def analyse_text(self, text: str) -> Dict[str, Any]:
