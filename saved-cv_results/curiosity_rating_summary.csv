@@ -1,0 +1,5 @@
+Configuration,Exact Accuracy,±1 Accuracy,±2 Accuracy,RMSE,Cohen's Kappa,Weighted Kappa,Pearson r
+zero_shot_temp0.6_cotYes_structuredYes,0.2718 ± 0.0203,0.8411 ± 0.0363,0.9470 ± 0.0237,1.2160 ± 0.0859,0.1097 ± 0.0183,0.3766 ± 0.0687,0.4230 ± 0.0689
+one_shot_temp0.6_cotYes_structuredYes,0.3365 ± 0.0180,0.7997 ± 0.0441,0.9724 ± 0.0117,1.1816 ± 0.0809,0.1462 ± 0.0155,0.4152 ± 0.0690,0.4361 ± 0.0682
+few_shot_temp0.6_cotYes_structuredYes,0.4147 ± 0.0348,0.8502 ± 0.0195,0.9839 ± 0.0156,1.0539 ± 0.0663,0.1975 ± 0.0444,0.4546 ± 0.0662,0.4680 ± 0.0694
+multi_shot_temp0.6_cotYes_structuredYes,0.4424 ± 0.0418,0.8801 ± 0.0411,1.0000 ± 0.0000,0.9556 ± 0.0639,0.1886 ± 0.0579,0.4443 ± 0.0603,0.4494 ± 0.0617

@@ -14,7 +14,7 @@ import copy
 
 BASEURL = 'http://localhost:8000/v1/'
 APIKEY = 'EMPTY'
-#MODEL = "Qwen/Qwen3-4B" # Un-comment to use 4B model
+#MODEL = "Qwen/Qwen3-4B" # Un-comment to use 4B variant
 MODEL = "Qwen/Qwen3-8B"
 
 class PostAnalyser:
