@@ -5,7 +5,7 @@ import pandas as pd
 from typing import Dict, List
 
 def parse_config_name(filename: str) -> Dict:
-    """Extract parameters from filename pattern: shotType_tempX_cotY_structuredY"""
+    """Extract parameters from filename pattern"""
     pattern = r"^(zero|one|few|multi)_shot_temp([\d.]+)_cot(Yes|No)_structured(Yes|No)_cv_results\.json$"
     match = re.match(pattern, filename)
     if not match:
@@ -38,24 +38,29 @@ def load_configs(results_dir: str) -> List[Dict]:
     return configs
 
 def calculate_composite_score(config: Dict, weights: Dict) -> float:
-    """Calculate weighted score based on metrics importance"""
-    scores = []
+    """Calculate weighted score including all accuracies, F1, and RMSE"""
+    score = 0.0
     
-    # Story classification
-    story = config["average_metrics"]["story_classification"]
-    scores.append(weights["story_f1"] * story["f1"]["mean"])
+    # Story classification metrics
+    story_metrics = config["average_metrics"]["story_classification"]
+    score += weights["story_accuracy"] * story_metrics["accuracy"]["mean"]
+    score += weights["story_f1"] * story_metrics["f1"]["mean"]
     
-    # Rating metrics
-    ratings = config["average_metrics"]["rating_metrics"]
+    # Rating dimensions (suspense, curiosity, surprise)
+    rating_metrics = config["average_metrics"]["rating_metrics"]
     for dimension in ["suspense", "curiosity", "surprise"]:
-        dim_metrics = ratings[dimension]
-        scores.append(weights[f"{dimension}_pearson"] * dim_metrics["pearson_correlation"]["mean"])
-        scores.append(weights[f"{dimension}_tolerance1"] * dim_metrics["tolerance1_accuracy"]["mean"])
+        dim_metrics = rating_metrics[dimension]
+        
+        # Add accuracy with dimension-specific weight
+        score += weights[f"{dimension}_accuracy"] * dim_metrics["accuracy"]["mean"]
+        
+        # Subtract RMSE (since lower is better) with dimension-specific weight
+        score -= weights[f"{dimension}_rmse"] * dim_metrics["rmse"]["mean"]
     
-    return sum(scores)
+    return score
 
 def compare_configs(configs: List[Dict], metric_weights: Dict) -> pd.DataFrame:
-    """Create comparison dataframe with key metrics"""
+    """Create comparison dataframe with all relevant metrics"""
     rows = []
     for config in configs:
         row = {
@@ -67,15 +72,18 @@ def compare_configs(configs: List[Dict], metric_weights: Dict) -> pd.DataFrame:
             "composite_score": calculate_composite_score(config, metric_weights)
         }
         
-        # Add key metrics
+        # Story metrics
         story = config["average_metrics"]["story_classification"]
-        row.update({f"story_{k}": v["mean"] for k, v in story.items()})
+        row.update({
+            "story_accuracy": story["accuracy"]["mean"],
+            "story_f1": story["f1"]["mean"]
+        })
         
+        # Rating metrics
         for dimension in ["suspense", "curiosity", "surprise"]:
             dim_metrics = config["average_metrics"]["rating_metrics"][dimension]
             row.update({
-                f"{dimension}_pearson": dim_metrics["pearson_correlation"]["mean"],
-                f"{dimension}_tolerance1": dim_metrics["tolerance1_accuracy"]["mean"],
+                f"{dimension}_accuracy": dim_metrics["accuracy"]["mean"],
                 f"{dimension}_rmse": dim_metrics["rmse"]["mean"]
             })
         
@@ -84,36 +92,34 @@ def compare_configs(configs: List[Dict], metric_weights: Dict) -> pd.DataFrame:
     df = pd.DataFrame(rows)
     return df.sort_values("composite_score", ascending=False)
 
-# Example weights - modify based on your priorities
 METRIC_WEIGHTS = {
-    "story_f1": 0.1,
-    "suspense_pearson": 0.2,
-    "curiosity_pearson": 0.15,
-    "surprise_pearson": 0.1,
-    "suspense_tolerance1": 0.9,
-    "curiosity_tolerance1": 0.9,
-    "surprise_tolerance1": 0.9
+    "story_accuracy": 0.2,
+    "story_f1": 0.2,
+    
+    "suspense_accuracy": 0.2,
+    "suspense_rmse": 0.1,
+    
+    "curiosity_accuracy": 0.2,
+    "curiosity_rmse": 0.1,
+    
+    "surprise_accuracy": 0.2,
+    "surprise_rmse": 0.1
 }
 
 if __name__ == "__main__":
-    # Load and compare configs
     configs = load_configs("cv_results")
     comparison_df = compare_configs(configs, METRIC_WEIGHTS)
     
-    # Display top configurations
     pd.set_option("display.max_columns", None)
     print("\nTop Configurations:")
-    print(comparison_df.head(10))
+    print(comparison_df.head(10).round(3))
     
-    # Save full results
     comparison_df.to_csv("config_comparison.csv", index=False)
     print("\nFull results saved to config_comparison.csv")
 
-    # Optional: Generate visualizations
-    # (Uncomment to plot key metrics)
-    # import matplotlib.pyplot as plt
-    # comparison_df.plot.bar(x="filename", y="composite_score")
-    # plt.title("Composite Scores by Configuration")
-    # plt.xticks(rotation=45, ha="right")
-    # plt.tight_layout()
-    # plt.show()
+    import matplotlib.pyplot as plt
+    comparison_df.plot.bar(x="filename", y="composite_score")
+    plt.title("Composite Scores by Configuration")
+    plt.xticks(rotation=45, ha="right")
+    plt.tight_layout()
+    plt.show()
