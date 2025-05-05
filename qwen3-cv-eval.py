@@ -40,10 +40,22 @@ class CrossValidationEvaluator:
         self.kf = KFold(n_splits=n_splits, shuffle=True, random_state=42)
         
         self.configurations = [
+            {"shot": "zero", "temperature": 0.2, "chain_of_thought": True, "use_structured_output": True},
+            {"shot": "one", "temperature": 0.2, "chain_of_thought": True, "use_structured_output": True},
+            {"shot": "few", "temperature": 0.2, "chain_of_thought": True, "use_structured_output": True},
+            {"shot": "multi", "temperature": 0.2, "chain_of_thought": True, "use_structured_output": True},
+            {"shot": "zero", "temperature": 0.4, "chain_of_thought": True, "use_structured_output": True},
+            {"shot": "one", "temperature": 0.4, "chain_of_thought": True, "use_structured_output": True},
+            {"shot": "few", "temperature": 0.4, "chain_of_thought": True, "use_structured_output": True},
+            {"shot": "multi", "temperature": 0.4, "chain_of_thought": True, "use_structured_output": True},
             {"shot": "zero", "temperature": 0.6, "chain_of_thought": True, "use_structured_output": True},
             {"shot": "one", "temperature": 0.6, "chain_of_thought": True, "use_structured_output": True},
             {"shot": "few", "temperature": 0.6, "chain_of_thought": True, "use_structured_output": True},
-            {"shot": "multi", "temperature": 0.6, "chain_of_thought": True, "use_structured_output": True}
+            {"shot": "multi", "temperature": 0.6, "chain_of_thought": True, "use_structured_output": True},
+            {"shot": "zero", "temperature": 0.8, "chain_of_thought": True, "use_structured_output": True},
+            {"shot": "one", "temperature": 0.8, "chain_of_thought": True, "use_structured_output": True},
+            {"shot": "few", "temperature": 0.8, "chain_of_thought": True, "use_structured_output": True},
+            {"shot": "multi", "temperature": 0.8, "chain_of_thought": True, "use_structured_output": True}
         ]
     
     def run_cross_validation(self, model_name: str = MODEL):
@@ -649,7 +661,7 @@ You MUST provide the output in a structured JSON format with the following struc
 
 def main():
     client = OpenAI(base_url=BASEURL, api_key=APIKEY)
-    input_file = "gs-train.json"
+    input_file = "gs-test.json"
     n_splits = 5
     evaluator = CrossValidationEvaluator(client, input_file, n_splits=n_splits)
     all_results = evaluator.run_cross_validation(model_name=MODEL)

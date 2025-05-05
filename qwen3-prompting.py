@@ -332,9 +332,9 @@ def process_gold_standard(client, input_file: str, model_name: str = MODEL, outp
         gold_standard = json.load(f)
 
     configurations = [
-        {"shot": "zero", "temperature": 0.6, "chain_of_thought": True, "use_structured_output": True},
-        {"shot": "one", "temperature": 0.6, "chain_of_thought": True, "use_structured_output": True},
-        {"shot": "few", "temperature": 0.6, "chain_of_thought": True, "use_structured_output": True},
+        #{"shot": "zero", "temperature": 0.6, "chain_of_thought": True, "use_structured_output": True},
+        #{"shot": "one", "temperature": 0.6, "chain_of_thought": True, "use_structured_output": True},
+        #{"shot": "few", "temperature": 0.6, "chain_of_thought": True, "use_structured_output": True},
         {"shot": "multi", "temperature": 0.6, "chain_of_thought": True, "use_structured_output": True}
     ]
 
