@@ -7,7 +7,17 @@ ssh -NL 8000:a100gpu6:8000 s3726134@login2.hb.hpc.rug.nl
 # WORK LOCALLY
 # check http://localhost:8000/v1/models
 
+# HABROK CODE FOR QWEN3-8B MODEL
+# TERMINAL 1
+srun --nodes=1 --ntasks=1 --partition=gpushort --mem=120G --time=04:00:00 --gres=gpu:a100:1 --pty bash
+source llm/bin/activate
+vllm serve Qwen/Qwen3-8B --download-dir /tmp/models --max-model-len 4096 --gpu-memory-utilization 0.95 --port 8000
+# TERMINAL 2
+ssh -NL 8000:a100gpu6:8000 s3726134@login2.hb.hpc.rug.nl
+# WORK LOCALLY
+# check http://localhost:8000/v1/models
 
+# HABROK CODE FOR QWEN3-4B MODEL
 # TERMINAL 1
 srun --nodes=1 --ntasks=1 --partition=gpushort --mem=120G --time=04:00:00 --gres=gpu:a100:1 --pty bash
 source llm/bin/activate

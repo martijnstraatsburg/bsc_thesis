@@ -1,10 +1,16 @@
 #!/usr/bin/env python3
+
+# Name: pipeline_unseen_cmv_discussions.py
+# Author: Martijn Straatsburg
+
 import os
 import json
 import re
 import csv
+import argparse
+from collections import defaultdict
 
-
+# Same list as in preprocess.py but used in reverse now to filer these out
 legal_name_list = [
     't1_c95k50u', 't1_c95k75v', 't1_c95mz3n', 't1_c95tixb', 't1_c95l4my',
     't1_c95mcms', 't1_c95mdhe', 't3_1aenyc', 't1_c8wpqjn', 't1_c8wrovj',
@@ -132,161 +138,168 @@ legal_name_list = [
     't1_cbogq70', 't1_cboi8d2', 't1_cboisgm', 't1_cboh71d', 't1_cbp7hcg'
 ]
 
-
-def remove_quotes(text):
+def remove_quotes(text: str) -> str:
     """
-    Remove quoted text from a comment body.
-    Removes any paragraphs that start with '>' or '&gt;'.
+    Remove quoted lines starting with '>' or '&gt;'.
     """
-    cleaned_text = re.sub(r'(?m)^\s*(?:&gt;|>).*?(?:\n\n|$)', '', text)
-    return cleaned_text.strip()
+    return re.sub(r'(?m)^\s*(?:&gt;|>).*?(?:\n\n|$)', '', text).strip()
 
-def find_comment_by_name(comments, target_name):
-    """Recursively find a comment by its 'name' (ID)."""
+def find_comment_by_name(comments: list, target_name: str) -> dict:
+    """
+    Recursively search for a comment by its name in a list of comments.
+    """
     for comment in comments:
-        if "name" not in comment:
-            continue
-        if comment["name"] == target_name:
+        if comment.get("name") == target_name:
             return comment
         if "children" in comment:
-            comment["replies"] = comment["children"]
-            del comment["children"]
-        if "replies" in comment:
-            found = find_comment_by_name(comment["replies"], target_name)
+            comment["replies"] = comment.pop("children")
+        for reply in comment.get("replies", []):
+            found = find_comment_by_name([reply], target_name)
             if found:
                 return found
     return None
 
-def process_comment(comment, all_comments):
-    """Process a comment and key order."""
-    comment["body"] = remove_quotes(comment["body"])
-    
-    if "children" in comment:
-        comment["replies"] = comment["children"]
-        del comment["children"]
-    
-    new_replies = []
-    for reply in comment.get("replies", []):
-        if reply["author"] == "DeltaBot" and "delta awarded" in reply["body"].lower():
-            match = re.search(r"/u/(\w+)", reply["body"])
-            if match:
-                target_author = match.group(1)
-                parent_comment = find_comment_by_name(all_comments, reply["parent_id"])
-                if parent_comment:
-                    grandparent_comment = find_comment_by_name(
-                        all_comments, parent_comment["parent_id"]
-                    )
-                    if grandparent_comment and grandparent_comment["author"] == target_author:
-                        grandparent_comment["persuasion_success"] = 1
-        else:
-            processed_reply = process_comment(reply, all_comments)
-            new_replies.append(processed_reply)
-
-    ordered_comment = {
-        "parent_id": comment["parent_id"],
-        "body": comment["body"],
-        "author": comment["author"],
-        "persuasion_success": comment.get("persuasion_success", 0),
-        "replies": new_replies
-    }
-    ordered_comment["created_utc"] = comment["retrieved_on"] if "retrieved_on" in comment else -1
-    ordered_comment["name"] = comment["name"] if "name" in comment else "unk"
-    return ordered_comment
-
-def init_persuasion(comment):
-    """Initialize the 'persuasion_success' field."""
+def init_persuasion(comment: dict) -> dict:
+    """
+    Initialize the persuasion_success field for a comment and its replies.
+    """
     comment["persuasion_success"] = 0
-    
     if "children" in comment:
-        comment["replies"] = comment["children"]
-        del comment["children"]
-    if "replies" in comment:
-        comment["replies"] = [init_persuasion(reply) for reply in comment["replies"]]
+        comment["replies"] = comment.pop("children")
+    for r in comment.get("replies", []):
+        init_persuasion(r)
     return comment
 
-def add_comments_to_csv(comments, rows):
-    for comment in comments:
-        row = {
-            "name": comment["name"],
-            "author": comment["author"],
-            "created_utc": comment["created_utc"],
-            "body": comment["body"],
-            "persuasion_success": comment.get("persuasion_success", 0),
-            "parent_id": comment["parent_id"]
-        }
-        if row["name"] not in legal_name_list:
-            rows.append(row)
+def process_comment(comment: dict, all_comments: list) -> dict:
+    """
+    Process a comment and its replies, updating the persuasion_success field based on DeltaBot comments.
+    """
+    comment["body"] = remove_quotes(comment.get("body", ""))
+    if "children" in comment:
+        comment["replies"] = comment.pop("children")
+
+    new_replies = []
+    for reply in comment.get("replies", []):
+        if reply.get("author") == "DeltaBot" and "delta awarded" in reply.get("body", "").lower():
+            m = re.search(r"/u/(\w+)", reply["body"])
+            if m:
+                target = m.group(1)
+                parent = find_comment_by_name(all_comments, reply.get("parent_id"))
+                if parent:
+                    grand = find_comment_by_name(all_comments, parent.get("parent_id"))
+                    if grand and grand.get("author") == target:
+                        grand["persuasion_success"] = 1
         else:
-            print(f"Note: ignoring comment '{row['name']}' because not in whitelist.")
-        if "replies" in comment:
-            add_comments_to_csv(comment["replies"], rows)
-        if "children" in comment:
-            comment["replies"] = comment["children"]
-            del comment["children"]
-            add_comments_to_csv(comment["replies"], rows)
+            new_replies.append(process_comment(reply, all_comments))
+
+    out = {
+        "name": comment.get("name", "unk"),
+        "author": comment.get("author"),
+        "created_utc": comment.get("retrieved_on", -1),
+        "body": comment.get("body", ""),
+        "persuasion_success": comment.get("persuasion_success", 0),
+        "parent_id": comment.get("parent_id"),
+        "replies": new_replies
+    }
+    return out
+
+def collect_rows_from_comments(comments: list, rows: list) -> None:
+    """
+    Recursively collect rows from comments and their replies.
+    """
+    for c in comments:
+        if c["name"] not in legal_name_list:
+            rows.append({
+                "name": c["name"],
+                "author": c["author"],
+                "created_utc": c["created_utc"],
+                "body": c["body"],
+                "persuasion_success": c["persuasion_success"],
+                "parent_id": c["parent_id"]
+            })
+        for r in c.get("replies", []):
+            collect_rows_from_comments([r], rows)
+
+
+def produce_csv_rows(threads_path: str) -> list:
+    """
+    Read threads.jsonl and produce a list of rows for CSV output.
+    """
+    rows = []
+    with open(threads_path, 'r', encoding='utf-8') as f:
+        for line in f:
+            thread = json.loads(line)
+            thread_comments = [init_persuasion(c) for c in thread.get("comments", [])]
+            processed = [process_comment(c, thread_comments) for c in thread_comments]
+
+            title = thread.get('title', '')
+            body = thread.get('body', '')
+            post_body = remove_quotes(title + '\n\n' + body)
+            post = {
+                'name': thread.get('name', 'unk'),
+                'author': thread.get('author'),
+                'created_utc': thread.get('created_utc'),
+                'body': post_body,
+                'persuasion_success': 0,
+                'parent_id': None
+            }
+            if post['name'] not in legal_name_list:
+                rows.append(post)
+            collect_rows_from_comments(processed, rows)
     return rows
 
 
-def process_file(file_path):
-    """Process a JSON file and output a CSV."""
-    with open(file_path, "r", encoding="utf-8") as f:
-        lines = f.readlines()
-    total_csv_rows = []
-    for line in lines:
-        data = json.loads(line)
+def limit_discussions(items: list, num_discussions: int) -> list:
+    """
+    Return a flat list of items for the first number of discussions top-level posts that have at least one comment/reply with persuasion_success = 1.
+    """
+    id_map = {i['name']: i for i in items}
+    children = defaultdict(list)
+    for i in items:
+        pid = i.get('parent_id')
+        if pid and pid in id_map:
+            children[pid].append(i['name'])
 
-        data["comments"] = [init_persuasion(comment) for comment in data["comments"]]
-        data["comments"] = [process_comment(comment, data["comments"]) for comment in data["comments"]]
+    def recurse_collect(root_id):
+        out = [id_map[root_id]]
+        for cid in children.get(root_id, []):
+            out.extend(recurse_collect(cid))
+        return out
 
-        csv_rows = []
-        
-        post_body = remove_quotes(data.get("title", "") + "\n\n" + data.get("body", ""))
-        post_row = {
-            "author": data["author"],
-            "created_utc": data["created_utc"],
-            "body": post_body,
-            "persuasion_success": 0,
-            "parent_id": None
-        }
-        if "name" in data:
-            post_row["name"] = data["name"]
-        else:
-            post_row["name"] = "unk"
+    result = []
+    count = 0
+    for i in items:
+        if i['name'].startswith('t3_'):
+            if count >= num_discussions:
+                break
+            discussion = recurse_collect(i['name'])
+            if any(d.get('persuasion_success') == 1 for d in discussion):
+                result.extend(discussion)
+                count += 1
+    return result
 
-        if post_row["name"] not in legal_name_list:
-            csv_rows.append(post_row)
-        else:
-            print(f"Note: ignoring post '{post_row['name']}' because not in whitelist.")
 
-        csv_rows = add_comments_to_csv(data["comments"], csv_rows)
-        total_csv_rows += csv_rows
-    print("Processed.")
-    return total_csv_rows
+def main():
+    parser = argparse.ArgumentParser(
+        description="Pipeline: threads.jsonl → filtered JSON discussions"
+    )
+    parser.add_argument('threads_file', help='Input threads.jsonl')
+    parser.add_argument('output_json', help='Final output JSON path')
+    parser.add_argument('--num-discussions', type=int, default=5,
+                        help='Max number of top-level discussions to include')
+    args = parser.parse_args()
 
-def process_directory(input_directory, output_directory):
-    """Process all JSON files in a directory into CSVs."""
-    if not os.path.exists(output_directory):
-        os.makedirs(output_directory)
+    print("Generating CSV rows from threads.jsonl ...")
+    csv_rows = produce_csv_rows(args.threads_file)
 
-    for filename in os.listdir(input_directory):
-        if filename.endswith(".json"):
-            file_path = os.path.join(input_directory, filename)
-            process_file(file_path, output_directory)
+    print(f"Total rows: {len(csv_rows)}")
+    print(f"Filtering to first {args.num_discussions} discussions with at least one delta given for each discussion ...")
+    limited = limit_discussions(csv_rows, args.num_discussions)
 
-def write_csv_rows_to_file(csv_rows):
-    """Write CSV rows to the file"""
-    with open("comments.csv", "w", newline="", encoding="utf-8") as csvfile:
-        writer = csv.DictWriter(csvfile, fieldnames=["name", "author", "created_utc", "body", "persuasion_success", "parent_id"])
-        writer.writeheader()
-        writer.writerows(csv_rows)
-    print("Saved.")
+    os.makedirs(os.path.dirname(args.output_json) or '.', exist_ok=True)
+    with open(args.output_json, 'w', encoding='utf-8') as outf:
+        json.dump(limited, outf, ensure_ascii=False, indent=2)
+    print(f"Wrote {len(limited)} items to {args.output_json}")
 
-if __name__ == "__main__":
-    if os.path.isfile("comments.csv"):
-        print("Note: deleting old comments.csv")
-        os.remove("comments.csv")
-    total_csv_rows = process_file("threads.jsonl")
-    write_csv_rows_to_file(total_csv_rows)
-
-    # process_directory("input_directory", "output_directory")
-    
+if __name__ == '__main__':
+    main()
