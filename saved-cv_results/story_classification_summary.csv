@@ -1,5 +1,0 @@
-Configuration,Accuracy,Precision,Recall,F1 Score
-zero_shot_temp0.6_cotYes_structuredYes,0.7649 ± 0.0282,0.7639 ± 0.0309,0.7592 ± 0.0291,0.7592 ± 0.0301
-one_shot_temp0.6_cotYes_structuredYes,0.7557 ± 0.0229,0.7721 ± 0.0264,0.7356 ± 0.0339,0.7374 ± 0.0326
-few_shot_temp0.6_cotYes_structuredYes,0.7672 ± 0.0204,0.7666 ± 0.0213,0.7609 ± 0.0245,0.7610 ± 0.0234
-multi_shot_temp0.6_cotYes_structuredYes,0.7903 ± 0.0394,0.7878 ± 0.0398,0.7883 ± 0.0372,0.7872 ± 0.0392
