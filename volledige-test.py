@@ -8,7 +8,11 @@ from tqdm import tqdm
 from openai import OpenAI
 from typing import Dict, Any, List, Union
 from sklearn.model_selection import KFold
-from sklearn.metrics import accuracy_score, precision_recall_fscore_support, mean_squared_error, cohen_kappa_score, matthews_corrcoef
+from sklearn.metrics import (
+    accuracy_score, precision_recall_fscore_support, 
+    mean_squared_error, mean_absolute_error,
+    cohen_kappa_score, matthews_corrcoef
+)
 import copy
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -16,11 +20,11 @@ from scipy.stats import pearsonr
 
 BASEURL = "http://localhost:8000/v1/"
 APIKEY = "EMPTY"
-#MODEL = "Qwen/Qwen3-4B" # Un-comment to use 4B variant
-MODEL = "Qwen/Qwen3-8B"
+MODEL = "Qwen/Qwen3-4B" # Un-comment to use 4B variant
+#MODEL = "Qwen/Qwen3-8B"
 
 class CrossValidationEvaluator:
-    def __init__(self, client, input_file: str, n_splits: int = 5, output_dir: str = "cv_results"):
+    def __init__(self, client, input_file: str, n_splits: int = 5, output_dir: str = "4B-train-cv_results"):
         """
         Initialize the cross-validation evaluator.
         Args:
@@ -40,6 +44,10 @@ class CrossValidationEvaluator:
         self.kf = KFold(n_splits=n_splits, shuffle=True, random_state=42)
         
         self.configurations = [
+            {"shot": "zero", "temperature": 0.1, "chain_of_thought": True, "use_structured_output": True},
+            {"shot": "one", "temperature": 0.1, "chain_of_thought": True, "use_structured_output": True},
+            {"shot": "few", "temperature": 0.1, "chain_of_thought": True, "use_structured_output": True},
+            {"shot": "multi", "temperature": 0.1, "chain_of_thought": True, "use_structured_output": True},
             {"shot": "zero", "temperature": 0.2, "chain_of_thought": True, "use_structured_output": True},
             {"shot": "one", "temperature": 0.2, "chain_of_thought": True, "use_structured_output": True},
             {"shot": "few", "temperature": 0.2, "chain_of_thought": True, "use_structured_output": True},
@@ -67,7 +75,11 @@ class CrossValidationEvaluator:
             {"shot": "zero", "temperature": 0.8, "chain_of_thought": True, "use_structured_output": True},
             {"shot": "one", "temperature": 0.8, "chain_of_thought": True, "use_structured_output": True},
             {"shot": "few", "temperature": 0.8, "chain_of_thought": True, "use_structured_output": True},
-            {"shot": "multi", "temperature": 0.8, "chain_of_thought": True, "use_structured_output": True}
+            {"shot": "multi", "temperature": 0.8, "chain_of_thought": True, "use_structured_output": True},
+            {"shot": "zero", "temperature": 0.9, "chain_of_thought": True, "use_structured_output": True},
+            {"shot": "one", "temperature": 0.9, "chain_of_thought": True, "use_structured_output": True},
+            {"shot": "few", "temperature": 0.9, "chain_of_thought": True, "use_structured_output": True},
+            {"shot": "multi", "temperature": 0.9, "chain_of_thought": True, "use_structured_output": True}
         ]
     
     def run_cross_validation(self, model_name: str = MODEL):
@@ -141,283 +153,325 @@ class CrossValidationEvaluator:
         
         return all_results
     
+    def calculate_metrics(self, true_data: List[Dict], pred_data: List[Dict]) -> Dict[str, Any]:
+        """
+        Calculate evaluation metrics by comparing true labels with predictions.
+        Args:
+            true_data (List[Dict]): List of entries with true labels.
+            pred_data (List[Dict]): List of entries with predicted labels.
+        Returns:
+            Dict[str, Any]: Dictionary of evaluation metrics.
+        """
+        y_true_story = [1 if item["story_class"] == "Story" else 0 for item in true_data]
+        y_pred_story = [1 if item["predicted_story_class"] == "Story" else 0 for item in pred_data]
+        
+        # Story classification metrics
+        story_accuracy = accuracy_score(y_true_story, y_pred_story)
+        
+        # Micro average (treats all instances equally)
+        micro_precision, micro_recall, micro_f1, _ = precision_recall_fscore_support(
+            y_true_story, y_pred_story, average='micro'
+        )
+        
+        # Macro average (treats all classes equally)
+        macro_precision, macro_recall, macro_f1, _ = precision_recall_fscore_support(
+            y_true_story, y_pred_story, average='macro'
+        )
+        
+        # Matthews correlation coefficient
+        story_mcc = matthews_corrcoef(y_true_story, y_pred_story)
+        
+        # Rating metrics for suspense, curiosity, surprise
+        rating_metrics = {}
+        for rating in ["suspense", "curiosity", "surprise"]:
+            y_true_rating = [item[rating] for item in true_data]
+            y_pred_rating = [item[f"predicted_{rating}"] for item in pred_data]
+            
+            # Perfect accuracy (exact match)
+            perfect_accuracy = accuracy_score(y_true_rating, y_pred_rating)
+            
+            # Off-by-one accuracy
+            off_by_one_accuracy = sum(abs(y_true - y_pred) <= 1 for y_true, y_pred in zip(y_true_rating, y_pred_rating)) / len(y_true_rating)
+            
+            # Root Mean Squared Error
+            rmse = np.sqrt(mean_squared_error(y_true_rating, y_pred_rating))
+            
+            # Mean Absolute Error
+            mae = mean_absolute_error(y_true_rating, y_pred_rating)
+            
+            # Quadratic Weighted Kappa
+            weighted_kappa = cohen_kappa_score(y_true_rating, y_pred_rating, weights='quadratic')
+            
+            rating_metrics[rating] = {
+                "perfect_accuracy": perfect_accuracy,
+                "off_by_one_accuracy": off_by_one_accuracy,
+                "rmse": rmse,
+                "mae": mae,
+                "quadratic_weighted_kappa": weighted_kappa
+            }
+        
+        return {
+            "story_classification": {
+                "accuracy": story_accuracy,
+                "micro_precision": micro_precision,
+                "micro_recall": micro_recall,
+                "micro_f1": micro_f1,
+                "macro_precision": macro_precision,
+                "macro_recall": macro_recall,
+                "macro_f1": macro_f1,
+                "mcc": story_mcc
+            },
+            "rating_metrics": rating_metrics
+        }
 
-def calculate_metrics(self, true_data: List[Dict], pred_data: List[Dict]) -> Dict[str, Any]:
-    """
-    Calculate evaluation metrics by comparing true labels with predictions.
-    Args:
-        true_data (List[Dict]): List of entries with true labels.
-        pred_data (List[Dict]): List of entries with predicted labels.
-    Returns:
-        Dict[str, Any]: Dictionary of evaluation metrics.
-    """
-    y_true_story = [1 if item["story_class"] == "Story" else 0 for item in true_data]
-    y_pred_story = [1 if item["predicted_story_class"] == "Story" else 0 for item in pred_data]
-    
-    story_accuracy = accuracy_score(y_true_story, y_pred_story)
-    story_precision, story_recall, story_f1, _ = precision_recall_fscore_support(
-        y_true_story, y_pred_story, average='macro'
-    )
-    
-    # Add Matthews correlation coefficient
-    story_mcc = matthews_corrcoef(y_true_story, y_pred_story)
-    
-    rating_metrics = {}
-    for rating in ["suspense", "curiosity", "surprise"]:
-        y_true_rating = [item[rating] for item in true_data]
-        y_pred_rating = [item[f"predicted_{rating}"] for item in pred_data]
-        
-        rating_accuracy = accuracy_score(y_true_rating, y_pred_rating)
-        
-        tolerance1_accuracy = sum(abs(y_true - y_pred) <= 1 for y_true, y_pred in zip(y_true_rating, y_pred_rating)) / len(y_true_rating)
-        tolerance2_accuracy = sum(abs(y_true - y_pred) <= 2 for y_true, y_pred in zip(y_true_rating, y_pred_rating)) / len(y_true_rating)
-        
-        rmse = np.sqrt(mean_squared_error(y_true_rating, y_pred_rating))
-        
-        kappa = cohen_kappa_score(y_true_rating, y_pred_rating)
-        
-        weighted_kappa = cohen_kappa_score(y_true_rating, y_pred_rating, weights='quadratic')
-        
-        pearson_corr, p_value = pearsonr(y_true_rating, y_pred_rating)
-        
-        rating_metrics[rating] = {
-            "accuracy": rating_accuracy,
-            "tolerance1_accuracy": tolerance1_accuracy,
-            "tolerance2_accuracy": tolerance2_accuracy,
-            "rmse": rmse,
-            "kappa": kappa,
-            "weighted_kappa": weighted_kappa,
-            "pearson_correlation": pearson_corr,
-            "pearson_p_value": p_value
+    def calculate_average_metrics(self, fold_metrics: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """
+        Calculate average metrics across all folds.
+        Args:
+            fold_metrics (List[Dict[str, Any]]): List of metrics from each fold.
+        Returns:
+            Dict[str, Any]: Dictionary of average metrics with standard deviations.
+        """
+        avg_metrics = {
+            "story_classification": {
+                "accuracy": {"mean": 0.0, "std": 0.0},
+                "micro_precision": {"mean": 0.0, "std": 0.0},
+                "micro_recall": {"mean": 0.0, "std": 0.0},
+                "micro_f1": {"mean": 0.0, "std": 0.0},
+                "macro_precision": {"mean": 0.0, "std": 0.0},
+                "macro_recall": {"mean": 0.0, "std": 0.0},
+                "macro_f1": {"mean": 0.0, "std": 0.0},
+                "mcc": {"mean": 0.0, "std": 0.0}
+            },
+            "rating_metrics": {
+                "suspense": {},
+                "curiosity": {},
+                "surprise": {}
+            }
         }
-    
-    return {
-        "story_classification": {
-            "accuracy": story_accuracy,
-            "precision": story_precision,
-            "recall": story_recall,
-            "f1": story_f1,
-            "mcc": story_mcc  # Added MCC to the metrics
-        },
-        "rating_metrics": rating_metrics
-    }
-
-def calculate_average_metrics(self, fold_metrics: List[Dict[str, Any]]) -> Dict[str, Any]:
-    """
-    Calculate average metrics across all folds.
-    Args:
-        fold_metrics (List[Dict[str, Any]]): List of metrics from each fold.
-    Returns:
-        Dict[str, Any]: Dictionary of average metrics with standard deviations.
-    """
-    avg_metrics = {
-        "story_classification": {
-            "accuracy": {"mean": 0.0, "std": 0.0},
-            "precision": {"mean": 0.0, "std": 0.0},
-            "recall": {"mean": 0.0, "std": 0.0},
-            "f1": {"mean": 0.0, "std": 0.0},
-            "mcc": {"mean": 0.0, "std": 0.0}  # Added MCC to the average metrics
-        },
-        "rating_metrics": {
-            "suspense": {},
-            "curiosity": {},
-            "surprise": {}
+        
+        story_metrics = {
+            "accuracy": [],
+            "micro_precision": [],
+            "micro_recall": [],
+            "micro_f1": [],
+            "macro_precision": [],
+            "macro_recall": [],
+            "macro_f1": [],
+            "mcc": []
         }
-    }
-    
-    story_metrics = {
-        "accuracy": [],
-        "precision": [],
-        "recall": [],
-        "f1": [],
-        "mcc": []  # Added MCC to the story metrics collection
-    }
-    
-    rating_metrics = {
-        "suspense": {
-            "accuracy": [], "tolerance1_accuracy": [], "tolerance2_accuracy": [],
-            "rmse": [], "kappa": [], "weighted_kappa": [],
-            "pearson_correlation": [], "pearson_p_value": []
-        },
-        "curiosity": {
-            "accuracy": [], "tolerance1_accuracy": [], "tolerance2_accuracy": [],
-            "rmse": [], "kappa": [], "weighted_kappa": [],
-            "pearson_correlation": [], "pearson_p_value": []
-        },
-        "surprise": {
-            "accuracy": [], "tolerance1_accuracy": [], "tolerance2_accuracy": [],
-            "rmse": [], "kappa": [], "weighted_kappa": [],
-            "pearson_correlation": [], "pearson_p_value": []
+        
+        rating_metrics = {
+            "suspense": {
+                "perfect_accuracy": [], "off_by_one_accuracy": [],
+                "rmse": [], "mae": [], "quadratic_weighted_kappa": []
+            },
+            "curiosity": {
+                "perfect_accuracy": [], "off_by_one_accuracy": [],
+                "rmse": [], "mae": [], "quadratic_weighted_kappa": []
+            },
+            "surprise": {
+                "perfect_accuracy": [], "off_by_one_accuracy": [],
+                "rmse": [], "mae": [], "quadratic_weighted_kappa": []
+            }
         }
-    }
-    
-    for fold_metric in fold_metrics:
+        
+        for fold_metric in fold_metrics:
+            for key in story_metrics.keys():
+                story_metrics[key].append(fold_metric["story_classification"][key])
+            
+            for rating in ["suspense", "curiosity", "surprise"]:
+                for metric_key in rating_metrics[rating].keys():
+                    rating_metrics[rating][metric_key].append(fold_metric["rating_metrics"][rating][metric_key])
+        
         for key in story_metrics.keys():
-            story_metrics[key].append(fold_metric["story_classification"][key])
+            avg_metrics["story_classification"][key]["mean"] = np.mean(story_metrics[key])
+            avg_metrics["story_classification"][key]["std"] = np.std(story_metrics[key])
         
         for rating in ["suspense", "curiosity", "surprise"]:
+            avg_metrics["rating_metrics"][rating] = {}
             for metric_key in rating_metrics[rating].keys():
-                rating_metrics[rating][metric_key].append(fold_metric["rating_metrics"][rating][metric_key])
-    
-    for key in story_metrics.keys():
-        avg_metrics["story_classification"][key]["mean"] = np.mean(story_metrics[key])
-        avg_metrics["story_classification"][key]["std"] = np.std(story_metrics[key])
-    
-    for rating in ["suspense", "curiosity", "surprise"]:
-        avg_metrics["rating_metrics"][rating] = {}
-        for metric_key in rating_metrics[rating].keys():
-            avg_metrics["rating_metrics"][rating][metric_key] = {
-                "mean": np.mean(rating_metrics[rating][metric_key]),
-                "std": np.std(rating_metrics[rating][metric_key])
-            }
-    
-    return avg_metrics
+                avg_metrics["rating_metrics"][rating][metric_key] = {
+                    "mean": np.mean(rating_metrics[rating][metric_key]),
+                    "std": np.std(rating_metrics[rating][metric_key])
+                }
+        
+        return avg_metrics
 
-def create_summary_report(self, all_results: Dict[str, Any]):
-    """
-    Create a summary report comparing all configurations.
-    Args:
-        all_results (Dict[str, Any]): Results from all configurations.
-    """
-    story_rows = []
-    for config_name, results in all_results.items():
-        metrics = results["average_metrics"]["story_classification"]
-        row = {
-            "Configuration": config_name,
-            "Accuracy": f"{metrics['accuracy']['mean']:.4f} ± {metrics['accuracy']['std']:.4f}",
-            "Precision": f"{metrics['precision']['mean']:.4f} ± {metrics['precision']['std']:.4f}",
-            "Recall": f"{metrics['recall']['mean']:.4f} ± {metrics['recall']['std']:.4f}",
-            "F1 Score": f"{metrics['f1']['mean']:.4f} ± {metrics['f1']['std']:.4f}",
-            "MCC": f"{metrics['mcc']['mean']:.4f} ± {metrics['mcc']['std']:.4f}"  # Added MCC to the summary report
-        }
-        story_rows.append(row)
-    
-    story_df = pd.DataFrame(story_rows)
-    
-    rating_dfs = {}
-    for rating in ["suspense", "curiosity", "surprise"]:
-        rows = []
+    def create_summary_report(self, all_results: Dict[str, Any]):
+        """
+        Create a summary report comparing all configurations.
+        Args:
+            all_results (Dict[str, Any]): Results from all configurations.
+        """
+        # Create story classification summary
+        story_rows = []
         for config_name, results in all_results.items():
-            metrics = results["average_metrics"]["rating_metrics"][rating]
+            metrics = results["average_metrics"]["story_classification"]
             row = {
                 "Configuration": config_name,
-                "Exact Accuracy": f"{metrics['accuracy']['mean']:.4f} ± {metrics['accuracy']['std']:.4f}",
-                "±1 Accuracy": f"{metrics['tolerance1_accuracy']['mean']:.4f} ± {metrics['tolerance1_accuracy']['std']:.4f}",
-                "±2 Accuracy": f"{metrics['tolerance2_accuracy']['mean']:.4f} ± {metrics['tolerance2_accuracy']['std']:.4f}",
-                "RMSE": f"{metrics['rmse']['mean']:.4f} ± {metrics['rmse']['std']:.4f}",
-                "Cohen's Kappa": f"{metrics['kappa']['mean']:.4f} ± {metrics['kappa']['std']:.4f}",
-                "Weighted Kappa": f"{metrics['weighted_kappa']['mean']:.4f} ± {metrics['weighted_kappa']['std']:.4f}",
-                "Pearson r": f"{metrics['pearson_correlation']['mean']:.4f} ± {metrics['pearson_correlation']['std']:.4f}"
+                "Accuracy": f"{metrics['accuracy']['mean']:.4f} ± {metrics['accuracy']['std']:.4f}",
+                "Micro Precision": f"{metrics['micro_precision']['mean']:.4f} ± {metrics['micro_precision']['std']:.4f}",
+                "Micro Recall": f"{metrics['micro_recall']['mean']:.4f} ± {metrics['micro_recall']['std']:.4f}",
+                "Micro F1": f"{metrics['micro_f1']['mean']:.4f} ± {metrics['micro_f1']['std']:.4f}",
+                "Macro Precision": f"{metrics['macro_precision']['mean']:.4f} ± {metrics['macro_precision']['std']:.4f}",
+                "Macro Recall": f"{metrics['macro_recall']['mean']:.4f} ± {metrics['macro_recall']['std']:.4f}",
+                "Macro F1": f"{metrics['macro_f1']['mean']:.4f} ± {metrics['macro_f1']['std']:.4f}",
+                "MCC": f"{metrics['mcc']['mean']:.4f} ± {metrics['mcc']['std']:.4f}"
             }
-            rows.append(row)
-        rating_dfs[rating] = pd.DataFrame(rows)
-    
-    story_df.to_csv(os.path.join(self.output_dir, "story_classification_summary.csv"), index=False)
-    for rating, df in rating_dfs.items():
-        df.to_csv(os.path.join(self.output_dir, f"{rating}_rating_summary.csv"), index=False)
-    
-    self.create_summary_plots(all_results)
-    
-    print("\nSummary reports created in the output directory.")
+            story_rows.append(row)
+        
+        story_df = pd.DataFrame(story_rows)
+        
+        # Create rating metrics summary for each rating
+        rating_dfs = {}
+        for rating in ["suspense", "curiosity", "surprise"]:
+            rows = []
+            for config_name, results in all_results.items():
+                metrics = results["average_metrics"]["rating_metrics"][rating]
+                row = {
+                    "Configuration": config_name,
+                    "Perfect Accuracy": f"{metrics['perfect_accuracy']['mean']:.4f} ± {metrics['perfect_accuracy']['std']:.4f}",
+                    "Off-by-One Accuracy": f"{metrics['off_by_one_accuracy']['mean']:.4f} ± {metrics['off_by_one_accuracy']['std']:.4f}",
+                    "RMSE": f"{metrics['rmse']['mean']:.4f} ± {metrics['rmse']['std']:.4f}",
+                    "MAE": f"{metrics['mae']['mean']:.4f} ± {metrics['mae']['std']:.4f}",
+                    "Quadratic Weighted Kappa": f"{metrics['quadratic_weighted_kappa']['mean']:.4f} ± {metrics['quadratic_weighted_kappa']['std']:.4f}"
+                }
+                rows.append(row)
+            rating_dfs[rating] = pd.DataFrame(rows)
+        
+        # Save CSV files
+        story_df.to_csv(os.path.join(self.output_dir, "story_classification_summary.csv"), index=False)
+        for rating, df in rating_dfs.items():
+            df.to_csv(os.path.join(self.output_dir, f"{rating}_rating_summary.csv"), index=False)
+        
+        # Create summary plots
+        self.create_summary_plots(all_results)
+        
+        print("\nSummary reports created in the output directory.")
 
-def create_summary_plots(self, all_results: Dict[str, Any]):
-    """
-    Create summary plots comparing different configurations.
-    Args:
-        all_results (Dict[str, Any]): Results from all configurations.
-    """
-    fig, ax = plt.subplots(figsize=(14, 6))  # Increased figure width to accommodate MCC
-    configs = list(all_results.keys())
-    metrics = ["accuracy", "precision", "recall", "f1", "mcc"]  # Added MCC to the metrics list
-    
-    x = np.arange(len(configs))
-    width = 0.15  # Reduced width to accommodate one more metric
-    multiplier = 0
-    
-    for metric in metrics:
-        means = [all_results[config]["average_metrics"]["story_classification"][metric]["mean"] for config in configs]
-        stds = [all_results[config]["average_metrics"]["story_classification"][metric]["std"] for config in configs]
+    def create_summary_plots(self, all_results: Dict[str, Any]):
+        """
+        Create summary plots comparing different configurations.
+        Args:
+            all_results (Dict[str, Any]): Results from all configurations.
+        """
+        configs = list(all_results.keys())
         
-        offset = width * multiplier
-        rects = ax.bar(x + offset, means, width, label=metric.upper() if metric == "mcc" else metric.capitalize(), yerr=stds)
-        multiplier += 1
-    
-    ax.set_ylabel('Score')
-    ax.set_title('Story Classification Metrics by Configuration')
-    ax.set_xticks(x + width * 2)  # Adjusted to center the labels with 5 metrics
-    ax.set_xticklabels([c.split('_shot')[0] for c in configs], rotation=45, ha='right')
-    ax.legend(loc='upper left', ncols=len(metrics))
-    ax.set_ylim(-1, 1)  # Changed y-axis range to accommodate MCC which can range from -1 to 1
-    
-    plt.tight_layout()
-    plt.savefig(os.path.join(self.output_dir, "story_classification_metrics.png"))
-    
-    # Create a separate plot just for MCC
-    fig, ax = plt.subplots(figsize=(12, 6))
-    means = [all_results[config]["average_metrics"]["story_classification"]["mcc"]["mean"] for config in configs]
-    stds = [all_results[config]["average_metrics"]["story_classification"]["mcc"]["std"] for config in configs]
-    
-    ax.bar(x, means, width=0.6, yerr=stds, color='purple')
-    
-    ax.set_ylabel('MCC Score')
-    ax.set_title('Matthews Correlation Coefficient (MCC) by Configuration')
-    ax.set_xticks(x)
-    ax.set_xticklabels([c.split('_shot')[0] for c in configs], rotation=45, ha='right')
-    ax.set_ylim(-1, 1)  # MCC ranges from -1 to 1
-    
-    plt.tight_layout()
-    plt.savefig(os.path.join(self.output_dir, "mcc_comparison.png"))
-    
-    for rating in ["suspense", "curiosity", "surprise"]:
-        fig, ax = plt.subplots(figsize=(12, 6))
-        accuracy_types = ["accuracy", "tolerance1_accuracy", "tolerance2_accuracy"]
-        labels = ["Exact Match", "±1 Tolerance", "±2 Tolerance"]
+        # Plot for story classification metrics
+        story_metrics = ["accuracy", "micro_precision", "micro_recall", "micro_f1", 
+                         "macro_precision", "macro_recall", "macro_f1"]
         
+        fig, ax = plt.subplots(figsize=(14, 8))
         x = np.arange(len(configs))
-        width = 0.25
-        multiplier = 0
+        width = 0.1  # Reduced width to accommodate more metrics
         
-        for i, acc_type in enumerate(accuracy_types):
-            means = [all_results[config]["average_metrics"]["rating_metrics"][rating][acc_type]["mean"] for config in configs]
-            stds = [all_results[config]["average_metrics"]["rating_metrics"][rating][acc_type]["std"] for config in configs]
+        for i, metric in enumerate(story_metrics):
+            means = [all_results[config]["average_metrics"]["story_classification"][metric]["mean"] for config in configs]
+            stds = [all_results[config]["average_metrics"]["story_classification"][metric]["std"] for config in configs]
             
-            offset = width * multiplier
-            rects = ax.bar(x + offset, means, width, label=labels[i], yerr=stds)
-            multiplier += 1
+            offset = width * (i - len(story_metrics)/2)
+            rects = ax.bar(x + offset, means, width, label=metric.replace('_', ' ').title(), yerr=stds)
         
-        ax.set_ylabel('Accuracy')
-        ax.set_title(f'{rating.capitalize()} Rating - Accuracy Comparison by Tolerance')
-        ax.set_xticks(x + width)
+        ax.set_ylabel('Score')
+        ax.set_title('Story Classification Metrics by Configuration')
+        ax.set_xticks(x)
         ax.set_xticklabels([c.split('_shot')[0] for c in configs], rotation=45, ha='right')
-        ax.legend(loc='upper left', ncols=len(accuracy_types))
+        ax.legend(loc='upper left', bbox_to_anchor=(1, 1))
         ax.set_ylim(0, 1)
         
         plt.tight_layout()
-        plt.savefig(os.path.join(self.output_dir, f"{rating}_accuracy_comparison.png"))
-    
-    fig, ax = plt.subplots(figsize=(12, 6))
-    ratings = ["suspense", "curiosity", "surprise"]
-    
-    x = np.arange(len(configs))
-    width = 0.25
-    multiplier = 0
-    
-    for rating in ratings:
-        means = [all_results[config]["average_metrics"]["rating_metrics"][rating]["weighted_kappa"]["mean"] for config in configs]
-        stds = [all_results[config]["average_metrics"]["rating_metrics"][rating]["weighted_kappa"]["std"] for config in configs]
+        plt.savefig(os.path.join(self.output_dir, "story_classification_metrics.png"))
         
-        offset = width * multiplier
-        rects = ax.bar(x + offset, means, width, label=rating.capitalize(), yerr=stds)
-        multiplier += 1
-    
-    ax.set_ylabel('Weighted Kappa')
-    ax.set_title('Weighted Kappa Comparison Across Ratings')
-    ax.set_xticks(x + width)
-    ax.set_xticklabels([c.split('_shot')[0] for c in configs], rotation=45, ha='right')
-    ax.legend(loc='upper left', ncols=len(ratings))
-    
-    plt.tight_layout()
-    plt.savefig(os.path.join(self.output_dir, "weighted_kappa_comparison.png"))
+        # Create a separate plot just for MCC
+        fig, ax = plt.subplots(figsize=(12, 6))
+        means = [all_results[config]["average_metrics"]["story_classification"]["mcc"]["mean"] for config in configs]
+        stds = [all_results[config]["average_metrics"]["story_classification"]["mcc"]["std"] for config in configs]
+        
+        ax.bar(x, means, width=0.6, yerr=stds, color='purple')
+        
+        ax.set_ylabel('MCC Score')
+        ax.set_title('Matthews Correlation Coefficient (MCC) by Configuration')
+        ax.set_xticks(x)
+        ax.set_xticklabels([c.split('_shot')[0] for c in configs], rotation=45, ha='right')
+        ax.set_ylim(-1, 1)  # MCC ranges from -1 to 1
+        
+        plt.tight_layout()
+        plt.savefig(os.path.join(self.output_dir, "mcc_comparison.png"))
+        
+        # Plot for each rating metric
+        for rating in ["suspense", "curiosity", "surprise"]:
+            # Accuracy comparison plot
+            fig, ax = plt.subplots(figsize=(12, 6))
+            accuracy_types = ["perfect_accuracy", "off_by_one_accuracy"]
+            labels = ["Perfect Match", "Off-by-One"]
+            
+            x = np.arange(len(configs))
+            width = 0.35
+            
+            for i, acc_type in enumerate(accuracy_types):
+                means = [all_results[config]["average_metrics"]["rating_metrics"][rating][acc_type]["mean"] for config in configs]
+                stds = [all_results[config]["average_metrics"]["rating_metrics"][rating][acc_type]["std"] for config in configs]
+                
+                offset = width * (i - 0.5)
+                rects = ax.bar(x + offset, means, width, label=labels[i], yerr=stds)
+            
+            ax.set_ylabel('Accuracy')
+            ax.set_title(f'{rating.capitalize()} Rating - Accuracy Comparison')
+            ax.set_xticks(x)
+            ax.set_xticklabels([c.split('_shot')[0] for c in configs], rotation=45, ha='right')
+            ax.legend(loc='upper left')
+            ax.set_ylim(0, 1)
+            
+            plt.tight_layout()
+            plt.savefig(os.path.join(self.output_dir, f"{rating}_accuracy_comparison.png"))
+            
+            # Error metrics plot
+            fig, ax = plt.subplots(figsize=(12, 6))
+            error_metrics = ["rmse", "mae"]
+            labels = ["RMSE", "MAE"]
+            
+            x = np.arange(len(configs))
+            width = 0.35
+            
+            for i, metric in enumerate(error_metrics):
+                means = [all_results[config]["average_metrics"]["rating_metrics"][rating][metric]["mean"] for config in configs]
+                stds = [all_results[config]["average_metrics"]["rating_metrics"][rating][metric]["std"] for config in configs]
+                
+                offset = width * (i - 0.5)
+                rects = ax.bar(x + offset, means, width, label=labels[i], yerr=stds)
+            
+            ax.set_ylabel('Error')
+            ax.set_title(f'{rating.capitalize()} Rating - Error Metrics')
+            ax.set_xticks(x)
+            ax.set_xticklabels([c.split('_shot')[0] for c in configs], rotation=45, ha='right')
+            ax.legend(loc='upper left')
+            
+            plt.tight_layout()
+            plt.savefig(os.path.join(self.output_dir, f"{rating}_error_metrics.png"))
+        
+        # Quadratic Weighted Kappa comparison plot
+        fig, ax = plt.subplots(figsize=(12, 6))
+        ratings = ["suspense", "curiosity", "surprise"]
+        
+        x = np.arange(len(configs))
+        width = 0.25
+        
+        for i, rating in enumerate(ratings):
+            means = [all_results[config]["average_metrics"]["rating_metrics"][rating]["quadratic_weighted_kappa"]["mean"] for config in configs]
+            stds = [all_results[config]["average_metrics"]["rating_metrics"][rating]["quadratic_weighted_kappa"]["std"] for config in configs]
+            
+            offset = width * (i - 1)
+            rects = ax.bar(x + offset, means, width, label=rating.capitalize(), yerr=stds)
+        
+        ax.set_ylabel('Quadratic Weighted Kappa')
+        ax.set_title('Quadratic Weighted Kappa Comparison Across Ratings')
+        ax.set_xticks(x)
+        ax.set_xticklabels([c.split('_shot')[0] for c in configs], rotation=45, ha='right')
+        ax.legend(loc='upper left')
+        
+        plt.tight_layout()
+        plt.savefig(os.path.join(self.output_dir, "quadratic_weighted_kappa_comparison.png"))
 
 
 class PostAnalyser:
@@ -697,7 +751,7 @@ You MUST provide the output in a structured JSON format with the following struc
 
 def main():
     client = OpenAI(base_url=BASEURL, api_key=APIKEY)
-    input_file = "gs-test.json"
+    input_file = "gs-train.json"
     n_splits = 5
     evaluator = CrossValidationEvaluator(client, input_file, n_splits=n_splits)
     all_results = evaluator.run_cross_validation(model_name=MODEL)
