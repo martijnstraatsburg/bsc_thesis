@@ -2,6 +2,10 @@
 
 # Name: pipeline_unseen_cmv_discussions.py
 # Author: Martijn Straatsburg
+# Description: This script processes a threads.jsonl file, filters and formats it,
+# and outputs a JSON file containing discussions with at least one comment/reply that has a Delta.
+# Example usage:
+# python pipeline_unseen_cmv_discussions.py threads.jsonl 1000-unseen-discussions.json --num-discussions 1000
 
 import os
 import json
@@ -281,7 +285,7 @@ def limit_discussions(items: list, num_discussions: int) -> list:
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Pipeline: threads.jsonl → filtered JSON discussions"
+        description="Pipeline: threads.jsonl --> unseen CMV discussions (with atleast one delta given per discussion)"
     )
     parser.add_argument('threads_file', help='Input threads.jsonl')
     parser.add_argument('output_json', help='Final output JSON path')
@@ -289,7 +293,6 @@ def main():
                         help='Max number of top-level discussions to include')
     args = parser.parse_args()
 
-    print("Generating CSV rows from threads.jsonl ...")
     csv_rows = produce_csv_rows(args.threads_file)
 
     print(f"Total rows: {len(csv_rows)}")
