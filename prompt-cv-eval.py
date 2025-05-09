@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
+# Name: qwen3-prompting.py
+# Author: Martijn Straatsburg
+# Description: ...
+
 import os
 import json
 import numpy as np
@@ -9,7 +13,7 @@ from openai import OpenAI
 from typing import Dict, Any, List, Union
 from sklearn.model_selection import KFold
 from sklearn.metrics import (
-    accuracy_score, precision_recall_fscore_support, 
+    accuracy_score, precision_recall_fscore_support,
     mean_squared_error, mean_absolute_error,
     cohen_kappa_score, matthews_corrcoef
 )
@@ -21,8 +25,9 @@ from scipy.stats import pearsonr
 BASEURL = "http://localhost:8000/v1/"
 APIKEY = "EMPTY"
 # Un-comment to use 4B or 8B variant
-#MODEL = "Qwen/Qwen3-4B"
+# MODEL = "Qwen/Qwen3-4B"
 MODEL = "Qwen/Qwen3-8B"
+
 
 class CrossValidationEvaluator:
     def __init__(self, client, input_file: str, n_splits: int = 5, output_dir: str = "8B-test-cv_results"):
@@ -38,25 +43,25 @@ class CrossValidationEvaluator:
         self.n_splits = n_splits
         self.output_dir = output_dir
         os.makedirs(output_dir, exist_ok=True)
-        
+
         with open(input_file, 'r', encoding='utf-8') as f:
             self.dataset = json.load(f)
-            
+
         self.kf = KFold(n_splits=n_splits, shuffle=True, random_state=42)
-        
+
         self.configurations = [
             # 4B model best configs
-            #{"shot": "zero", "temperature": 0.6, "chain_of_thought": True, "use_structured_output": True},
-            #{"shot": "one", "temperature": 0.3, "chain_of_thought": True, "use_structured_output": True},
-            #{"shot": "few", "temperature": 0.7, "chain_of_thought": True, "use_structured_output": True},
-            #{"shot": "multi", "temperature": 0.5, "chain_of_thought": True, "use_structured_output": True}
+            # {"shot": "zero", "temperature": 0.6, "chain_of_thought": True, "use_structured_output": True},
+            # {"shot": "one", "temperature": 0.3, "chain_of_thought": True, "use_structured_output": True},
+            # {"shot": "few", "temperature": 0.7, "chain_of_thought": True, "use_structured_output": True},
+            # {"shot": "multi", "temperature": 0.5, "chain_of_thought": True, "use_structured_output": True}
             # 8B model best configs
-            #{"shot": "zero", "temperature": 0.3, "chain_of_thought": True, "use_structured_output": True},
-            #{"shot": "one", "temperature": 0.2, "chain_of_thought": True, "use_structured_output": True},
-            #{"shot": "few", "temperature": 0.1, "chain_of_thought": True, "use_structured_output": True},
-            {"shot": "multi", "temperature": 0.2, "chain_of_thought": True, "use_structured_output": True}
+            # {"shot": "zero", "temperature": 0.3, "chain_of_thought": True, "use_structured_output": True},
+            # {"shot": "one", "temperature": 0.2, "chain_of_thought": True, "use_structured_output": True},
+            # {"shot": "few", "temperature": 0.1, "chain_of_thought": True, "use_structured_output": True},
+            # {"shot": "multi", "temperature": 0.2, "chain_of_thought": True, "use_structured_output": True}
         ]
-    
+
     def run_cross_validation(self, model_name: str = MODEL):
         """
         Run cross-validation for all configurations.
@@ -64,70 +69,76 @@ class CrossValidationEvaluator:
             model_name (str): Name of the model to use.
         """
         all_results = {}
-        
+
         for config in self.configurations:
             config_name = f"{config['shot']}_shot_temp{config['temperature']}_cot{'Yes' if config['chain_of_thought'] else 'No'}_structured{'Yes' if config['use_structured_output'] else 'No'}"
             print(f"\n--- Cross-validating with {config_name} ---")
-            
+
             fold_results = []
-            
+
             for fold_idx, (train_idx, test_idx) in enumerate(self.kf.split(self.dataset)):
                 print(f"  Fold {fold_idx+1}/{self.n_splits}")
-                
+
                 train_data = [self.dataset[i] for i in train_idx]
                 test_data = [self.dataset[i] for i in test_idx]
-                
+
                 analyser = PostAnalyser(
-                    client=self.client, 
-                    model_name=model_name, 
+                    client=self.client,
+                    model_name=model_name,
                     shot=config['shot'],
                     temperature=config['temperature'],
                     chain_of_thought=config['chain_of_thought'],
                     use_structured_output=config['use_structured_output']
                 )
-                
+
                 test_predictions = copy.deepcopy(test_data)
-                
+
                 for i, entry in enumerate(tqdm(test_predictions, desc=f"Analyzing fold {fold_idx+1}")):
                     text = entry["body"]
                     analysis = analyser.analyse_text(text)
-                    
+
                     if "error" not in analysis:
                         entry["predicted_story_class"] = analysis["story_class"]
                         entry["predicted_suspense"] = analysis["suspense"]
                         entry["predicted_curiosity"] = analysis["curiosity"]
                         entry["predicted_surprise"] = analysis["surprise"]
                     else:
-                        print(f"Error analyzing entry {i+1}: {analysis['error']}")
+                        print(
+                            f"Error analyzing entry {i+1}: {analysis['error']}")
                         entry["predicted_story_class"] = "Not Story"
                         entry["predicted_suspense"] = 1
                         entry["predicted_curiosity"] = 1
                         entry["predicted_surprise"] = 1
-                
-                fold_metric = self.calculate_metrics(test_data, test_predictions)
+
+                fold_metric = self.calculate_metrics(
+                    test_data, test_predictions)
                 fold_results.append(fold_metric)
-                
-                fold_output = os.path.join(self.output_dir, f"{config_name}_fold{fold_idx+1}_predictions.json")
+
+                fold_output = os.path.join(
+                    self.output_dir, f"{config_name}_fold{fold_idx+1}_predictions.json")
                 with open(fold_output, 'w', encoding='utf-8') as f:
-                    json.dump(test_predictions, f, indent=2, ensure_ascii=False)
-            
+                    json.dump(test_predictions, f,
+                              indent=2, ensure_ascii=False)
+
             avg_metrics = self.calculate_average_metrics(fold_results)
             all_results[config_name] = {
                 "average_metrics": avg_metrics,
                 "fold_metrics": fold_results
             }
-            
-            config_output = os.path.join(self.output_dir, f"{config_name}_cv_results.json")
+
+            config_output = os.path.join(
+                self.output_dir, f"{config_name}_cv_results.json")
             with open(config_output, 'w', encoding='utf-8') as f:
-                json.dump(all_results[config_name], f, indent=2, ensure_ascii=False)
-            
+                json.dump(all_results[config_name], f,
+                          indent=2, ensure_ascii=False)
+
             print(f"\nAverage metrics for {config_name}:")
             print(json.dumps(avg_metrics, indent=2))
-        
+
         self.create_summary_report(all_results)
-        
+
         return all_results
-    
+
     def calculate_metrics(self, true_data: List[Dict], pred_data: List[Dict]) -> Dict[str, Any]:
         """
         Calculate evaluation metrics by comparing true labels with predictions.
@@ -137,46 +148,40 @@ class CrossValidationEvaluator:
         Returns:
             Dict[str, Any]: Dictionary of evaluation metrics.
         """
-        y_true_story = [1 if item["story_class"] == "Story" else 0 for item in true_data]
-        y_pred_story = [1 if item["predicted_story_class"] == "Story" else 0 for item in pred_data]
-        
-        # Story classification metrics
+        y_true_story = [1 if item["story_class"] ==
+                        "Story" else 0 for item in true_data]
+        y_pred_story = [1 if item["predicted_story_class"]
+                        == "Story" else 0 for item in pred_data]
+
         story_accuracy = accuracy_score(y_true_story, y_pred_story)
-        
-        # Micro average (treats all instances equally)
+
         micro_precision, micro_recall, micro_f1, _ = precision_recall_fscore_support(
             y_true_story, y_pred_story, average='micro'
         )
-        
-        # Macro average (treats all classes equally)
+
         macro_precision, macro_recall, macro_f1, _ = precision_recall_fscore_support(
             y_true_story, y_pred_story, average='macro'
         )
-        
-        # Matthews correlation coefficient
+
         story_mcc = matthews_corrcoef(y_true_story, y_pred_story)
-        
-        # Rating metrics for suspense, curiosity, surprise
+
         rating_metrics = {}
         for rating in ["suspense", "curiosity", "surprise"]:
             y_true_rating = [item[rating] for item in true_data]
             y_pred_rating = [item[f"predicted_{rating}"] for item in pred_data]
-            
-            # Perfect accuracy (exact match)
+
             perfect_accuracy = accuracy_score(y_true_rating, y_pred_rating)
-            
-            # Off-by-one accuracy
-            off_by_one_accuracy = sum(abs(y_true - y_pred) <= 1 for y_true, y_pred in zip(y_true_rating, y_pred_rating)) / len(y_true_rating)
-            
-            # Root Mean Squared Error
+
+            off_by_one_accuracy = sum(abs(y_true - y_pred) <= 1 for y_true, y_pred in zip(
+                y_true_rating, y_pred_rating)) / len(y_true_rating)
+
             rmse = np.sqrt(mean_squared_error(y_true_rating, y_pred_rating))
-            
-            # Mean Absolute Error
+
             mae = mean_absolute_error(y_true_rating, y_pred_rating)
-            
-            # Quadratic Weighted Kappa
-            weighted_kappa = cohen_kappa_score(y_true_rating, y_pred_rating, weights='quadratic')
-            
+
+            weighted_kappa = cohen_kappa_score(
+                y_true_rating, y_pred_rating, weights='quadratic')
+
             rating_metrics[rating] = {
                 "perfect_accuracy": perfect_accuracy,
                 "off_by_one_accuracy": off_by_one_accuracy,
@@ -184,7 +189,7 @@ class CrossValidationEvaluator:
                 "mae": mae,
                 "quadratic_weighted_kappa": weighted_kappa
             }
-        
+
         return {
             "story_classification": {
                 "accuracy": story_accuracy,
@@ -224,7 +229,7 @@ class CrossValidationEvaluator:
                 "surprise": {}
             }
         }
-        
+
         story_metrics = {
             "accuracy": [],
             "micro_precision": [],
@@ -235,7 +240,7 @@ class CrossValidationEvaluator:
             "macro_f1": [],
             "mcc": []
         }
-        
+
         rating_metrics = {
             "suspense": {
                 "perfect_accuracy": [], "off_by_one_accuracy": [],
@@ -250,19 +255,23 @@ class CrossValidationEvaluator:
                 "rmse": [], "mae": [], "quadratic_weighted_kappa": []
             }
         }
-        
+
         for fold_metric in fold_metrics:
             for key in story_metrics.keys():
-                story_metrics[key].append(fold_metric["story_classification"][key])
-            
+                story_metrics[key].append(
+                    fold_metric["story_classification"][key])
+
             for rating in ["suspense", "curiosity", "surprise"]:
                 for metric_key in rating_metrics[rating].keys():
-                    rating_metrics[rating][metric_key].append(fold_metric["rating_metrics"][rating][metric_key])
-        
+                    rating_metrics[rating][metric_key].append(
+                        fold_metric["rating_metrics"][rating][metric_key])
+
         for key in story_metrics.keys():
-            avg_metrics["story_classification"][key]["mean"] = np.mean(story_metrics[key])
-            avg_metrics["story_classification"][key]["std"] = np.std(story_metrics[key])
-        
+            avg_metrics["story_classification"][key]["mean"] = np.mean(
+                story_metrics[key])
+            avg_metrics["story_classification"][key]["std"] = np.std(
+                story_metrics[key])
+
         for rating in ["suspense", "curiosity", "surprise"]:
             avg_metrics["rating_metrics"][rating] = {}
             for metric_key in rating_metrics[rating].keys():
@@ -270,7 +279,7 @@ class CrossValidationEvaluator:
                     "mean": np.mean(rating_metrics[rating][metric_key]),
                     "std": np.std(rating_metrics[rating][metric_key])
                 }
-        
+
         return avg_metrics
 
     def create_summary_report(self, all_results: Dict[str, Any]):
@@ -279,7 +288,6 @@ class CrossValidationEvaluator:
         Args:
             all_results (Dict[str, Any]): Results from all configurations.
         """
-        # Create story classification summary
         story_rows = []
         for config_name, results in all_results.items():
             metrics = results["average_metrics"]["story_classification"]
@@ -295,10 +303,9 @@ class CrossValidationEvaluator:
                 "MCC": f"{metrics['mcc']['mean']:.4f} ± {metrics['mcc']['std']:.4f}"
             }
             story_rows.append(row)
-        
+
         story_df = pd.DataFrame(story_rows)
-        
-        # Create rating metrics summary for each rating
+
         rating_dfs = {}
         for rating in ["suspense", "curiosity", "surprise"]:
             rows = []
@@ -314,15 +321,15 @@ class CrossValidationEvaluator:
                 }
                 rows.append(row)
             rating_dfs[rating] = pd.DataFrame(rows)
-        
-        # Save CSV files
-        story_df.to_csv(os.path.join(self.output_dir, "story_classification_summary.csv"), index=False)
+
+        story_df.to_csv(os.path.join(self.output_dir,
+                        "story_classification_summary.csv"), index=False)
         for rating, df in rating_dfs.items():
-            df.to_csv(os.path.join(self.output_dir, f"{rating}_rating_summary.csv"), index=False)
-        
-        # Create summary plots
+            df.to_csv(os.path.join(self.output_dir,
+                      f"{rating}_rating_summary.csv"), index=False)
+
         self.create_summary_plots(all_results)
-        
+
         print("\nSummary reports created in the output directory.")
 
     def create_summary_plots(self, all_results: Dict[str, Any]):
@@ -332,125 +339,142 @@ class CrossValidationEvaluator:
             all_results (Dict[str, Any]): Results from all configurations.
         """
         configs = list(all_results.keys())
-        
-        # Plot for story classification metrics
-        story_metrics = ["accuracy", "micro_precision", "micro_recall", "micro_f1", 
+
+        story_metrics = ["accuracy", "micro_precision", "micro_recall", "micro_f1",
                          "macro_precision", "macro_recall", "macro_f1"]
-        
+
         fig, ax = plt.subplots(figsize=(14, 8))
         x = np.arange(len(configs))
-        width = 0.1  # Reduced width to accommodate more metrics
-        
+        width = 0.1
+
         for i, metric in enumerate(story_metrics):
-            means = [all_results[config]["average_metrics"]["story_classification"][metric]["mean"] for config in configs]
-            stds = [all_results[config]["average_metrics"]["story_classification"][metric]["std"] for config in configs]
-            
+            means = [all_results[config]["average_metrics"]
+                     ["story_classification"][metric]["mean"] for config in configs]
+            stds = [all_results[config]["average_metrics"]
+                    ["story_classification"][metric]["std"] for config in configs]
+
             offset = width * (i - len(story_metrics)/2)
-            rects = ax.bar(x + offset, means, width, label=metric.replace('_', ' ').title(), yerr=stds)
-        
+            rects = ax.bar(x + offset, means, width,
+                           label=metric.replace('_', ' ').title(), yerr=stds)
+
         ax.set_ylabel('Score')
         ax.set_title('Story Classification Metrics by Configuration')
         ax.set_xticks(x)
-        ax.set_xticklabels([c.split('_shot')[0] for c in configs], rotation=45, ha='right')
+        ax.set_xticklabels([c.split('_shot')[0]
+                           for c in configs], rotation=45, ha='right')
         ax.legend(loc='upper left', bbox_to_anchor=(1, 1))
         ax.set_ylim(0, 1)
-        
+
         plt.tight_layout()
-        plt.savefig(os.path.join(self.output_dir, "story_classification_metrics.png"))
-        
-        # Create a separate plot just for MCC
+        plt.savefig(os.path.join(self.output_dir,
+                    "story_classification_metrics.png"))
+
         fig, ax = plt.subplots(figsize=(12, 6))
-        means = [all_results[config]["average_metrics"]["story_classification"]["mcc"]["mean"] for config in configs]
-        stds = [all_results[config]["average_metrics"]["story_classification"]["mcc"]["std"] for config in configs]
-        
+        means = [all_results[config]["average_metrics"]
+                 ["story_classification"]["mcc"]["mean"] for config in configs]
+        stds = [all_results[config]["average_metrics"]
+                ["story_classification"]["mcc"]["std"] for config in configs]
+
         ax.bar(x, means, width=0.6, yerr=stds, color='purple')
-        
+
         ax.set_ylabel('MCC Score')
         ax.set_title('Matthews Correlation Coefficient (MCC) by Configuration')
         ax.set_xticks(x)
-        ax.set_xticklabels([c.split('_shot')[0] for c in configs], rotation=45, ha='right')
-        ax.set_ylim(-1, 1)  # MCC ranges from -1 to 1
-        
+        ax.set_xticklabels([c.split('_shot')[0]
+                           for c in configs], rotation=45, ha='right')
+        ax.set_ylim(-1, 1)
+
         plt.tight_layout()
         plt.savefig(os.path.join(self.output_dir, "mcc_comparison.png"))
-        
-        # Plot for each rating metric
+
         for rating in ["suspense", "curiosity", "surprise"]:
-            # Accuracy comparison plot
             fig, ax = plt.subplots(figsize=(12, 6))
             accuracy_types = ["perfect_accuracy", "off_by_one_accuracy"]
             labels = ["Perfect Match", "Off-by-One"]
-            
+
             x = np.arange(len(configs))
             width = 0.35
-            
+
             for i, acc_type in enumerate(accuracy_types):
-                means = [all_results[config]["average_metrics"]["rating_metrics"][rating][acc_type]["mean"] for config in configs]
-                stds = [all_results[config]["average_metrics"]["rating_metrics"][rating][acc_type]["std"] for config in configs]
-                
+                means = [all_results[config]["average_metrics"]["rating_metrics"]
+                         [rating][acc_type]["mean"] for config in configs]
+                stds = [all_results[config]["average_metrics"]["rating_metrics"]
+                        [rating][acc_type]["std"] for config in configs]
+
                 offset = width * (i - 0.5)
-                rects = ax.bar(x + offset, means, width, label=labels[i], yerr=stds)
-            
+                rects = ax.bar(x + offset, means, width,
+                               label=labels[i], yerr=stds)
+
             ax.set_ylabel('Accuracy')
             ax.set_title(f'{rating.capitalize()} Rating - Accuracy Comparison')
             ax.set_xticks(x)
-            ax.set_xticklabels([c.split('_shot')[0] for c in configs], rotation=45, ha='right')
+            ax.set_xticklabels([c.split('_shot')[0]
+                               for c in configs], rotation=45, ha='right')
             ax.legend(loc='upper left')
             ax.set_ylim(0, 1)
-            
+
             plt.tight_layout()
-            plt.savefig(os.path.join(self.output_dir, f"{rating}_accuracy_comparison.png"))
-            
-            # Error metrics plot
+            plt.savefig(os.path.join(self.output_dir,
+                        f"{rating}_accuracy_comparison.png"))
+
             fig, ax = plt.subplots(figsize=(12, 6))
             error_metrics = ["rmse", "mae"]
             labels = ["RMSE", "MAE"]
-            
+
             x = np.arange(len(configs))
             width = 0.35
-            
+
             for i, metric in enumerate(error_metrics):
-                means = [all_results[config]["average_metrics"]["rating_metrics"][rating][metric]["mean"] for config in configs]
-                stds = [all_results[config]["average_metrics"]["rating_metrics"][rating][metric]["std"] for config in configs]
-                
+                means = [all_results[config]["average_metrics"]["rating_metrics"]
+                         [rating][metric]["mean"] for config in configs]
+                stds = [all_results[config]["average_metrics"]["rating_metrics"]
+                        [rating][metric]["std"] for config in configs]
+
                 offset = width * (i - 0.5)
-                rects = ax.bar(x + offset, means, width, label=labels[i], yerr=stds)
-            
+                rects = ax.bar(x + offset, means, width,
+                               label=labels[i], yerr=stds)
+
             ax.set_ylabel('Error')
             ax.set_title(f'{rating.capitalize()} Rating - Error Metrics')
             ax.set_xticks(x)
-            ax.set_xticklabels([c.split('_shot')[0] for c in configs], rotation=45, ha='right')
+            ax.set_xticklabels([c.split('_shot')[0]
+                               for c in configs], rotation=45, ha='right')
             ax.legend(loc='upper left')
-            
+
             plt.tight_layout()
-            plt.savefig(os.path.join(self.output_dir, f"{rating}_error_metrics.png"))
-        
-        # Quadratic Weighted Kappa comparison plot
+            plt.savefig(os.path.join(self.output_dir,
+                        f"{rating}_error_metrics.png"))
+
         fig, ax = plt.subplots(figsize=(12, 6))
         ratings = ["suspense", "curiosity", "surprise"]
-        
+
         x = np.arange(len(configs))
         width = 0.25
-        
+
         for i, rating in enumerate(ratings):
-            means = [all_results[config]["average_metrics"]["rating_metrics"][rating]["quadratic_weighted_kappa"]["mean"] for config in configs]
-            stds = [all_results[config]["average_metrics"]["rating_metrics"][rating]["quadratic_weighted_kappa"]["std"] for config in configs]
-            
+            means = [all_results[config]["average_metrics"]["rating_metrics"]
+                     [rating]["quadratic_weighted_kappa"]["mean"] for config in configs]
+            stds = [all_results[config]["average_metrics"]["rating_metrics"]
+                    [rating]["quadratic_weighted_kappa"]["std"] for config in configs]
+
             offset = width * (i - 1)
-            rects = ax.bar(x + offset, means, width, label=rating.capitalize(), yerr=stds)
-        
+            rects = ax.bar(x + offset, means, width,
+                           label=rating.capitalize(), yerr=stds)
+
         ax.set_ylabel('Quadratic Weighted Kappa')
         ax.set_title('Quadratic Weighted Kappa Comparison Across Ratings')
         ax.set_xticks(x)
-        ax.set_xticklabels([c.split('_shot')[0] for c in configs], rotation=45, ha='right')
+        ax.set_xticklabels([c.split('_shot')[0]
+                           for c in configs], rotation=45, ha='right')
         ax.legend(loc='upper left')
-        
+
         plt.tight_layout()
-        plt.savefig(os.path.join(self.output_dir, "quadratic_weighted_kappa_comparison.png"))
+        plt.savefig(os.path.join(self.output_dir,
+                    "quadratic_weighted_kappa_comparison.png"))
 
 
 class PostAnalyser:
-    def __init__(self, client, model_name: str = MODEL, shot: str = "multi", temperature: float = 0.6, 
+    def __init__(self, client, model_name: str = MODEL, shot: str = "multi", temperature: float = 0.6,
                  chain_of_thought: bool = True, use_structured_output: bool = True):
         """
         Initialise PostAnalyser with OpenAI client and model parameters.
@@ -469,7 +493,7 @@ class PostAnalyser:
         self.chain_of_thought = chain_of_thought
         self.use_structured_output = use_structured_output
         self.system_prompt = self._create_system_prompt()
-        
+
     def _create_system_prompt(self) -> str:
         """
         Create the system prompt with persona and instructions.
@@ -647,7 +671,8 @@ You MUST provide the output in a structured JSON format with the following struc
                 model=self.model,
                 messages=messages,
                 temperature=self.temperature,
-                response_format={"type": "json_object"} if self.use_structured_output else None
+                response_format={
+                    "type": "json_object"} if self.use_structured_output else None
             )
 
             response_text = response.choices[0].message.content
@@ -657,8 +682,9 @@ You MUST provide the output in a structured JSON format with the following struc
                 if "story_class" not in result:
                     raise ValueError("Missing 'story_class' in response")
                 if result["story_class"] not in ["Story", "Not Story"]:
-                    result["story_class"] = "Not Story" if result["story_class"].lower() in ["not story", "not a story", "no story"] else "Story"
-                
+                    result["story_class"] = "Not Story" if result["story_class"].lower(
+                    ) in ["not story", "not a story", "no story"] else "Story"
+
                 for key in ["suspense", "curiosity", "surprise"]:
                     if key not in result:
                         result[key] = 1
@@ -667,7 +693,7 @@ You MUST provide the output in a structured JSON format with the following struc
                             result[key] = max(1, min(5, int(result[key])))
                         except (ValueError, TypeError):
                             result[key] = 1
-                
+
                 return result
             except json.JSONDecodeError:
                 import re
@@ -676,35 +702,42 @@ You MUST provide the output in a structured JSON format with the following struc
                     try:
                         result = json.loads(json_match.group(1))
                         if "story_class" not in result:
-                            raise ValueError("Missing 'story_class' in response")
+                            raise ValueError(
+                                "Missing 'story_class' in response")
                         if result["story_class"] not in ["Story", "Not Story"]:
-                            result["story_class"] = "Not Story" if result["story_class"].lower() in ["not story", "not a story", "no story"] else "Story"
-                        
+                            result["story_class"] = "Not Story" if result["story_class"].lower(
+                            ) in ["not story", "not a story", "no story"] else "Story"
+
                         for key in ["suspense", "curiosity", "surprise"]:
                             if key not in result:
                                 result[key] = 1
                             else:
                                 try:
-                                    result[key] = max(1, min(5, int(result[key])))
+                                    result[key] = max(
+                                        1, min(5, int(result[key])))
                                 except (ValueError, TypeError):
                                     result[key] = 1
-                        
+
                         return result
                     except:
                         pass
-                
-                story_match = re.search(r'story_class["\']\s*:\s*["\']([^"\']+)["\']', response_text, re.IGNORECASE)
+
+                story_match = re.search(
+                    r'story_class["\']\s*:\s*["\']([^"\']+)["\']', response_text, re.IGNORECASE)
                 story_class = "Not Story"
                 if story_match:
                     extracted = story_match.group(1)
-                    story_class = "Story" if "story" in extracted.lower() and "not" not in extracted.lower() else "Not Story"
-                
+                    story_class = "Story" if "story" in extracted.lower(
+                    ) and "not" not in extracted.lower() else "Not Story"
+
                 ratings = {}
                 for key in ["suspense", "curiosity", "surprise"]:
-                    rating_match = re.search(f'{key}["\']\s*:\s*(\d+)', response_text, re.IGNORECASE)
-                    ratings[key] = int(rating_match.group(1)) if rating_match else 1
+                    rating_match = re.search(
+                        f'{key}["\']\s*:\s*(\d+)', response_text, re.IGNORECASE)
+                    ratings[key] = int(rating_match.group(1)
+                                       ) if rating_match else 1
                     ratings[key] = max(1, min(5, ratings[key]))
-                
+
                 return {
                     "story_class": story_class,
                     "suspense": ratings["suspense"],
@@ -731,7 +764,7 @@ def main():
     evaluator = CrossValidationEvaluator(client, input_file, n_splits=n_splits)
     all_results = evaluator.run_cross_validation(model_name=MODEL)
     sample_text = "I believe that the conclusions reached by the House Select Committee on Assassinations (HSCA) regarding the assassination of JFK on Nov. 22, 1963 are true and accurate. CMV.\n\nI believe that Lee Harvey Oswald assassinated JFK using a single rifle, fired all of the shots that killed him and wounded Gov. Connally, and did so as an individual actor (not as the agent of a nation or organized group). My knowledge of the Kennedy Assassination is admittedly limited; I've studied it in school and participated in several university level class discussions about the investigations and conspiracies surrounding the issue. After looking at the conclusions reached by the Warren Commission, I was somewhat skeptical of the notion that Lee Harvey Oswald acted alone, but the HSCA report clarifies some of the issues surrounding the timing and circumstances of the assassination, and leaves open the idea that Oswald may have had a partner. Additionally, I do feel that the events following the assassination are slightly suspicious (notably LBJ appointing and overseeing the Warren Commission), but are not at present sufficient for me to discount the accepted explanation of the assassination.  The number of conspiracy or alternate theories surrounding the assassination is prodigious and confusing, to say the least, but I am willing to accept an alternate theory and CMV if someone can present a compelling alternate explanation of the JFK assassination supported by clear and provable facts."
-    analyser = PostAnalyser(client=client, model_name=MODEL, shot="multi", temperature=0.6, 
+    analyser = PostAnalyser(client=client, model_name=MODEL, shot="multi", temperature=0.6,
                             chain_of_thought=True, use_structured_output=True)
     result = analyser.analyse_text(sample_text)
     print(json.dumps(result, indent=2))
