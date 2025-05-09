@@ -6,6 +6,7 @@ vllm serve Qwen/Qwen3-8B --download-dir /tmp/models --max-model-len 4096 --gpu-m
 # TERMINAL 2
 ssh -NL 8000:a100gpu6:8000 s3726134@login2.hb.hpc.rug.nl
 # WORK LOCALLY
+# CHECK WHAT NUMBER AFTER a100gpu !!!
 # check http://localhost:8000/v1/models
 
 # HABROK CODE FOR QWEN3-4B MODEL
@@ -16,5 +17,5 @@ vllm serve Qwen/Qwen3-4B --download-dir /tmp/models --max-model-len 4096 --gpu-m
 # TERMINAL 2
 ssh -NL 8000:a100gpu6:8000 s3726134@login2.hb.hpc.rug.nl
 # WORK LOCALLY
-# CHECK WHAT NUMBER AFTER a100gpu !
+# CHECK WHAT NUMBER AFTER a100gpu !!!
 # check http://localhost:8000/v1/models
