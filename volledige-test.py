@@ -20,11 +20,12 @@ from scipy.stats import pearsonr
 
 BASEURL = "http://localhost:8000/v1/"
 APIKEY = "EMPTY"
-MODEL = "Qwen/Qwen3-4B" # Un-comment to use 4B variant
-#MODEL = "Qwen/Qwen3-8B"
+# Un-comment to use 4B or 8B variant
+#MODEL = "Qwen/Qwen3-4B"
+MODEL = "Qwen/Qwen3-8B"
 
 class CrossValidationEvaluator:
-    def __init__(self, client, input_file: str, n_splits: int = 5, output_dir: str = "4B-train-cv_results"):
+    def __init__(self, client, input_file: str, n_splits: int = 5, output_dir: str = "8B-test-cv_results"):
         """
         Initialize the cross-validation evaluator.
         Args:
@@ -44,42 +45,16 @@ class CrossValidationEvaluator:
         self.kf = KFold(n_splits=n_splits, shuffle=True, random_state=42)
         
         self.configurations = [
-            {"shot": "zero", "temperature": 0.1, "chain_of_thought": True, "use_structured_output": True},
-            {"shot": "one", "temperature": 0.1, "chain_of_thought": True, "use_structured_output": True},
-            {"shot": "few", "temperature": 0.1, "chain_of_thought": True, "use_structured_output": True},
-            {"shot": "multi", "temperature": 0.1, "chain_of_thought": True, "use_structured_output": True},
-            {"shot": "zero", "temperature": 0.2, "chain_of_thought": True, "use_structured_output": True},
-            {"shot": "one", "temperature": 0.2, "chain_of_thought": True, "use_structured_output": True},
-            {"shot": "few", "temperature": 0.2, "chain_of_thought": True, "use_structured_output": True},
-            {"shot": "multi", "temperature": 0.2, "chain_of_thought": True, "use_structured_output": True},
-            {"shot": "zero", "temperature": 0.3, "chain_of_thought": True, "use_structured_output": True},
-            {"shot": "one", "temperature": 0.3, "chain_of_thought": True, "use_structured_output": True},
-            {"shot": "few", "temperature": 0.3, "chain_of_thought": True, "use_structured_output": True},
-            {"shot": "multi", "temperature": 0.3, "chain_of_thought": True, "use_structured_output": True},
-            {"shot": "zero", "temperature": 0.4, "chain_of_thought": True, "use_structured_output": True},
-            {"shot": "one", "temperature": 0.4, "chain_of_thought": True, "use_structured_output": True},
-            {"shot": "few", "temperature": 0.4, "chain_of_thought": True, "use_structured_output": True},
-            {"shot": "multi", "temperature": 0.4, "chain_of_thought": True, "use_structured_output": True},
-            {"shot": "zero", "temperature": 0.5, "chain_of_thought": True, "use_structured_output": True},
-            {"shot": "one", "temperature": 0.5, "chain_of_thought": True, "use_structured_output": True},
-            {"shot": "few", "temperature": 0.5, "chain_of_thought": True, "use_structured_output": True},
-            {"shot": "multi", "temperature": 0.5, "chain_of_thought": True, "use_structured_output": True},
-            {"shot": "zero", "temperature": 0.6, "chain_of_thought": True, "use_structured_output": True},
-            {"shot": "one", "temperature": 0.6, "chain_of_thought": True, "use_structured_output": True},
-            {"shot": "few", "temperature": 0.6, "chain_of_thought": True, "use_structured_output": True},
-            {"shot": "multi", "temperature": 0.6, "chain_of_thought": True, "use_structured_output": True},
-            {"shot": "zero", "temperature": 0.7, "chain_of_thought": True, "use_structured_output": True},
-            {"shot": "one", "temperature": 0.7, "chain_of_thought": True, "use_structured_output": True},
-            {"shot": "few", "temperature": 0.7, "chain_of_thought": True, "use_structured_output": True},
-            {"shot": "multi", "temperature": 0.7, "chain_of_thought": True, "use_structured_output": True},
-            {"shot": "zero", "temperature": 0.8, "chain_of_thought": True, "use_structured_output": True},
-            {"shot": "one", "temperature": 0.8, "chain_of_thought": True, "use_structured_output": True},
-            {"shot": "few", "temperature": 0.8, "chain_of_thought": True, "use_structured_output": True},
-            {"shot": "multi", "temperature": 0.8, "chain_of_thought": True, "use_structured_output": True},
-            {"shot": "zero", "temperature": 0.9, "chain_of_thought": True, "use_structured_output": True},
-            {"shot": "one", "temperature": 0.9, "chain_of_thought": True, "use_structured_output": True},
-            {"shot": "few", "temperature": 0.9, "chain_of_thought": True, "use_structured_output": True},
-            {"shot": "multi", "temperature": 0.9, "chain_of_thought": True, "use_structured_output": True}
+            # 4B model best configs
+            #{"shot": "zero", "temperature": 0.6, "chain_of_thought": True, "use_structured_output": True},
+            #{"shot": "one", "temperature": 0.3, "chain_of_thought": True, "use_structured_output": True},
+            #{"shot": "few", "temperature": 0.7, "chain_of_thought": True, "use_structured_output": True},
+            #{"shot": "multi", "temperature": 0.5, "chain_of_thought": True, "use_structured_output": True}
+            # 8B model best configs
+            #{"shot": "zero", "temperature": 0.3, "chain_of_thought": True, "use_structured_output": True},
+            #{"shot": "one", "temperature": 0.2, "chain_of_thought": True, "use_structured_output": True},
+            #{"shot": "few", "temperature": 0.1, "chain_of_thought": True, "use_structured_output": True},
+            {"shot": "multi", "temperature": 0.2, "chain_of_thought": True, "use_structured_output": True}
         ]
     
     def run_cross_validation(self, model_name: str = MODEL):
@@ -751,7 +726,7 @@ You MUST provide the output in a structured JSON format with the following struc
 
 def main():
     client = OpenAI(base_url=BASEURL, api_key=APIKEY)
-    input_file = "gs-train.json"
+    input_file = "gs-test.json"
     n_splits = 5
     evaluator = CrossValidationEvaluator(client, input_file, n_splits=n_splits)
     all_results = evaluator.run_cross_validation(model_name=MODEL)

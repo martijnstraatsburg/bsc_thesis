@@ -1,0 +1,283 @@
+{
+  "average_metrics": {
+    "story_classification": {
+      "accuracy": {
+        "mean": 0.8388335704125177,
+        "std": 0.03344964655863229
+      },
+      "micro_precision": {
+        "mean": 0.8388335704125177,
+        "std": 0.03344964655863229
+      },
+      "micro_recall": {
+        "mean": 0.8388335704125177,
+        "std": 0.03344964655863229
+      },
+      "micro_f1": {
+        "mean": 0.8388335704125177,
+        "std": 0.033449646558632314
+      },
+      "macro_precision": {
+        "mean": 0.8247707343807088,
+        "std": 0.03430574412633897
+      },
+      "macro_recall": {
+        "mean": 0.8539754835807468,
+        "std": 0.046272190510020426
+      },
+      "macro_f1": {
+        "mean": 0.8305650964345019,
+        "std": 0.03492730745683401
+      },
+      "mcc": {
+        "mean": 0.6778759020589454,
+        "std": 0.0785440481464649
+      }
+    },
+    "rating_metrics": {
+      "suspense": {
+        "perfect_accuracy": {
+          "mean": 0.3930298719772404,
+          "std": 0.11678130781502866
+        },
+        "off_by_one_accuracy": {
+          "mean": 0.8871977240398292,
+          "std": 0.06686480379699958
+        },
+        "rmse": {
+          "mean": 0.9948869983095904,
+          "std": 0.1914625226483912
+        },
+        "mae": {
+          "mean": 0.7359886201991466,
+          "std": 0.18958258119105958
+        },
+        "quadratic_weighted_kappa": {
+          "mean": 0.5041428317746078,
+          "std": 0.1549586292171126
+        }
+      },
+      "curiosity": {
+        "perfect_accuracy": {
+          "mean": 0.3604551920341394,
+          "std": 0.07660051563036778
+        },
+        "off_by_one_accuracy": {
+          "mean": 0.8388335704125177,
+          "std": 0.015566843835339371
+        },
+        "rmse": {
+          "mean": 1.143429630733425,
+          "std": 0.06395879865176471
+        },
+        "mae": {
+          "mean": 0.838406827880512,
+          "std": 0.09239126386617107
+        },
+        "quadratic_weighted_kappa": {
+          "mean": 0.4751468716242292,
+          "std": 0.06479364125021116
+        }
+      },
+      "surprise": {
+        "perfect_accuracy": {
+          "mean": 0.3066856330014225,
+          "std": 0.05920368052557205
+        },
+        "off_by_one_accuracy": {
+          "mean": 0.8173541963015648,
+          "std": 0.07863907613874771
+        },
+        "rmse": {
+          "mean": 1.1945099483648758,
+          "std": 0.17292408743173662
+        },
+        "mae": {
+          "mean": 0.9190611664295876,
+          "std": 0.15293850111763033
+        },
+        "quadratic_weighted_kappa": {
+          "mean": 0.3786604639223057,
+          "std": 0.17655872535091047
+        }
+      }
+    }
+  },
+  "fold_metrics": [
+    {
+      "story_classification": {
+        "accuracy": 0.8157894736842105,
+        "micro_precision": 0.8157894736842105,
+        "micro_recall": 0.8157894736842105,
+        "micro_f1": 0.8157894736842104,
+        "macro_precision": 0.7898550724637681,
+        "macro_recall": 0.8205128205128205,
+        "macro_f1": 0.7989417989417991,
+        "mcc": 0.6095974632995459
+      },
+      "rating_metrics": {
+        "suspense": {
+          "perfect_accuracy": 0.2894736842105263,
+          "off_by_one_accuracy": 0.868421052631579,
+          "rmse": 1.0513149660756937,
+          "mae": 0.8421052631578947,
+          "quadratic_weighted_kappa": 0.4275466284074604
+        },
+        "curiosity": {
+          "perfect_accuracy": 0.3157894736842105,
+          "off_by_one_accuracy": 0.8157894736842105,
+          "rmse": 1.1697953037312037,
+          "mae": 0.8947368421052632,
+          "quadratic_weighted_kappa": 0.4146919431279621
+        },
+        "surprise": {
+          "perfect_accuracy": 0.2631578947368421,
+          "off_by_one_accuracy": 0.7894736842105263,
+          "rmse": 1.224744871391589,
+          "mae": 0.9736842105263158,
+          "quadratic_weighted_kappa": 0.4230154501864677
+        }
+      }
+    },
+    {
+      "story_classification": {
+        "accuracy": 0.8648648648648649,
+        "micro_precision": 0.8648648648648649,
+        "micro_recall": 0.8648648648648649,
+        "micro_f1": 0.8648648648648649,
+        "macro_precision": 0.84375,
+        "macro_recall": 0.9038461538461539,
+        "macro_f1": 0.8542159180457052,
+        "mcc": 0.7451767988460601
+      },
+      "rating_metrics": {
+        "suspense": {
+          "perfect_accuracy": 0.24324324324324326,
+          "off_by_one_accuracy": 0.7837837837837838,
+          "rmse": 1.2411851354816252,
+          "mae": 1.0,
+          "quadratic_weighted_kappa": 0.3776925346709944
+        },
+        "curiosity": {
+          "perfect_accuracy": 0.32432432432432434,
+          "off_by_one_accuracy": 0.8378378378378378,
+          "rmse": 1.138989594902999,
+          "mae": 0.8648648648648649,
+          "quadratic_weighted_kappa": 0.5102040816326531
+        },
+        "surprise": {
+          "perfect_accuracy": 0.3783783783783784,
+          "off_by_one_accuracy": 0.7837837837837838,
+          "rmse": 1.1854979567276382,
+          "mae": 0.8648648648648649,
+          "quadratic_weighted_kappa": 0.3837283792440743
+        }
+      }
+    },
+    {
+      "story_classification": {
+        "accuracy": 0.8108108108108109,
+        "micro_precision": 0.8108108108108109,
+        "micro_recall": 0.8108108108108109,
+        "micro_f1": 0.8108108108108109,
+        "macro_precision": 0.8117647058823529,
+        "macro_recall": 0.8099415204678362,
+        "macro_f1": 0.8102564102564103,
+        "mcc": 0.621703553052045
+      },
+      "rating_metrics": {
+        "suspense": {
+          "perfect_accuracy": 0.5675675675675675,
+          "off_by_one_accuracy": 0.972972972972973,
+          "rmse": 0.7165985720844785,
+          "mae": 0.4594594594594595,
+          "quadratic_weighted_kappa": 0.7666777298373714
+        },
+        "curiosity": {
+          "perfect_accuracy": 0.40540540540540543,
+          "off_by_one_accuracy": 0.8378378378378378,
+          "rmse": 1.1624763874381927,
+          "mae": 0.8108108108108109,
+          "quadratic_weighted_kappa": 0.5661350844277673
+        },
+        "surprise": {
+          "perfect_accuracy": 0.35135135135135137,
+          "off_by_one_accuracy": 0.8918918918918919,
+          "rmse": 1.115008180796555,
+          "mae": 0.8108108108108109,
+          "quadratic_weighted_kappa": 0.447043534762833
+        }
+      }
+    },
+    {
+      "story_classification": {
+        "accuracy": 0.8918918918918919,
+        "micro_precision": 0.8918918918918919,
+        "micro_recall": 0.8918918918918919,
+        "micro_f1": 0.8918918918918919,
+        "macro_precision": 0.8823529411764706,
+        "macro_recall": 0.9166666666666667,
+        "macro_f1": 0.8878787878787878,
+        "mcc": 0.7982824700322464
+      },
+      "rating_metrics": {
+        "suspense": {
+          "perfect_accuracy": 0.40540540540540543,
+          "off_by_one_accuracy": 0.8648648648648649,
+          "rmse": 1.1270626736212455,
+          "mae": 0.7837837837837838,
+          "quadratic_weighted_kappa": 0.3571164510166358
+        },
+        "curiosity": {
+          "perfect_accuracy": 0.4864864864864865,
+          "off_by_one_accuracy": 0.8648648648648649,
+          "rmse": 1.0266713466606798,
+          "mae": 0.6756756756756757,
+          "quadratic_weighted_kappa": 0.4956308982873121
+        },
+        "surprise": {
+          "perfect_accuracy": 0.21621621621621623,
+          "off_by_one_accuracy": 0.7027027027027027,
+          "rmse": 1.4886961463697743,
+          "mae": 1.1891891891891893,
+          "quadratic_weighted_kappa": 0.05305867665418229
+        }
+      }
+    },
+    {
+      "story_classification": {
+        "accuracy": 0.8108108108108109,
+        "micro_precision": 0.8108108108108109,
+        "micro_recall": 0.8108108108108109,
+        "micro_f1": 0.8108108108108109,
+        "macro_precision": 0.7961309523809523,
+        "macro_recall": 0.8189102564102564,
+        "macro_f1": 0.8015325670498084,
+        "mcc": 0.6146192250648298
+      },
+      "rating_metrics": {
+        "suspense": {
+          "perfect_accuracy": 0.4594594594594595,
+          "off_by_one_accuracy": 0.9459459459459459,
+          "rmse": 0.8382736442849094,
+          "mae": 0.5945945945945946,
+          "quadratic_weighted_kappa": 0.5916808149405772
+        },
+        "curiosity": {
+          "perfect_accuracy": 0.2702702702702703,
+          "off_by_one_accuracy": 0.8378378378378378,
+          "rmse": 1.2192155209340498,
+          "mae": 0.9459459459459459,
+          "quadratic_weighted_kappa": 0.38907235064545176
+        },
+        "surprise": {
+          "perfect_accuracy": 0.32432432432432434,
+          "off_by_one_accuracy": 0.918918918918919,
+          "rmse": 0.9586025865388216,
+          "mae": 0.7567567567567568,
+          "quadratic_weighted_kappa": 0.5864562787639711
+        }
+      }
+    }
+  ]
+}

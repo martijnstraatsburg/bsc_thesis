@@ -1,0 +1,9 @@
+shot_type,filename,score
+few,few_shot_temp0.1_cotYes_structuredYes_cv_results.json,0.3489
+few,few_shot_temp0.6_cotYes_structuredYes_cv_results.json,0.3477
+multi,multi_shot_temp0.2_cotYes_structuredYes_cv_results.json,0.5720
+multi,multi_shot_temp0.5_cotYes_structuredYes_cv_results.json,0.5355
+one,one_shot_temp0.2_cotYes_structuredYes_cv_results.json,-0.1256
+one,one_shot_temp0.1_cotYes_structuredYes_cv_results.json,-0.1621
+zero,zero_shot_temp0.3_cotYes_structuredYes_cv_results.json,-0.3569
+zero,zero_shot_temp0.5_cotYes_structuredYes_cv_results.json,-0.3886
