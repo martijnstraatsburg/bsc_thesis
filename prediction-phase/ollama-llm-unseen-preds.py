@@ -1,36 +1,34 @@
 #!/usr/bin/env python3
 
-# Name: qwen3-prompting.py
-# Author: Martijn Straatsburg
-# Description: ...
+# Name: qwen3-prompting-ollama.py
+# Author: Martijn Straatsburg (adapted for Ollama)
+# Description: Post analysis using local Ollama models
 
 import os
 import pandas as pd
 from tqdm import tqdm
-from openai import OpenAI
 import json
+import requests
 from typing import Dict, Any, List, Union
 import copy
 
-BASEURL = 'http://localhost:8000/v1/'
-APIKEY = 'EMPTY'
-MODEL = "Qwen/Qwen3-4B" # Un-comment to use 4B variant
-#MODEL = "Qwen/Qwen3-8B"
+# Ollama configuration
+OLLAMA_URL = 'http://localhost:11434/api/generate'  # Default Ollama API endpoint
+MODEL = "qwen3:4b"  # Change to any model you have pulled in Ollama
+# Other options might include: "llama3:8b", "mistral:7b", "gemma:7b", etc.
 
 class PostAnalyser:
-    def __init__(self, client, model_name: str = MODEL, shot: str = "multi", temperature: float = 0.6, 
+    def __init__(self, model_name: str = MODEL, shot: str = "multi", temperature: float = 0.6, 
                  chain_of_thought: bool = True, use_structured_output: bool = True):
         """
-        Initialise PostAnalyser with OpenAI client and model parameters.
+        Initialise PostAnalyser with Ollama configuration and model parameters.
         Args:
-            client: OpenAI client instance.
-            model_name (str): Name of the model to use.
+            model_name (str): Name of the model to use in Ollama.
             shot (str): Shot technique to use ('zero', 'one', 'few', 'multi').
             temperature (float): Temperature for sampling.
             chain_of_thought (bool): Whether to use chain of thought reasoning.
             use_structured_output (bool): Whether to use structured output format.
         """
-        self.client = client
         self.model = model_name
         self.shot = shot
         self.temperature = temperature
@@ -197,7 +195,7 @@ You MUST provide the output in a structured JSON format with the following struc
 
     def analyse_text(self, text: str) -> Dict[str, Any]:
         """
-        Analyse the provided text and return structured results.
+        Analyse the provided text and return structured results using Ollama API.
         Args:
             text (str): The text to analyse.
         Returns:
@@ -206,19 +204,25 @@ You MUST provide the output in a structured JSON format with the following struc
         prompt = f"Text to analyse:\n\n{text}"
 
         try:
-            messages = [
-                {"role": "system", "content": self.system_prompt},
-                {"role": "user", "content": prompt}
-            ]
+            # Prepare the request for Ollama API
+            request_payload = {
+                "model": self.model,
+                "messages": [
+                    {"role": "system", "content": self.system_prompt},
+                    {"role": "user", "content": prompt}
+                ],
+                "options": {
+                    "temperature": self.temperature
+                },
+                "format": "json" if self.use_structured_output else None
+            }
 
-            response = self.client.chat.completions.create(
-                model=self.model,
-                messages=messages,
-                temperature=self.temperature,
-                response_format={"type": "json_object"} if self.use_structured_output else None
-            )
-
-            response_text = response.choices[0].message.content
+            # Make the request to Ollama API
+            response = requests.post(OLLAMA_URL, json=request_payload)
+            response.raise_for_status()  # Raise an exception for HTTP errors
+            
+            response_data = response.json()
+            response_text = response_data.get("message", {}).get("content", "")
 
             try:
                 result = json.loads(response_text)
@@ -317,11 +321,10 @@ You MUST provide the output in a structured JSON format with the following struc
         print(f"Results saved to {output_file}")
 
 
-def process_gold_standard(client, input_file: str, model_name: str = MODEL, output_dir: str = "results"):
+def process_gold_standard(input_file: str, model_name: str = MODEL, output_dir: str = "results"):
     """
     Process the dataset with different 'shot' (prompting) techniques.
     Args:
-        client: OpenAI client instance.
         input_file (str): Path to the input JSON file containing the dataset.
         model_name (str): Name of the model to use.
         output_dir (str): Directory to save the output JSON files.
@@ -332,9 +335,6 @@ def process_gold_standard(client, input_file: str, model_name: str = MODEL, outp
         gold_standard = json.load(f)
 
     configurations = [
-        #{"shot": "zero", "temperature": 0.6, "chain_of_thought": True, "use_structured_output": True},
-        #{"shot": "one", "temperature": 0.6, "chain_of_thought": True, "use_structured_output": True},
-        #{"shot": "few", "temperature": 0.6, "chain_of_thought": True, "use_structured_output": True},
         {"shot": "multi", "temperature": 0.5, "chain_of_thought": True, "use_structured_output": True}
     ]
 
@@ -343,7 +343,6 @@ def process_gold_standard(client, input_file: str, model_name: str = MODEL, outp
         print(f"\n--- Processing with {config_name} ---")
 
         analyser = PostAnalyser(
-            client=client, 
             model_name=model_name, 
             shot=config['shot'],
             temperature=config['temperature'],
@@ -376,15 +375,13 @@ def process_gold_standard(client, input_file: str, model_name: str = MODEL, outp
 
 
 if __name__ == "__main__":
-    client = OpenAI(base_url=BASEURL, api_key=APIKEY)
-
     mod_gold_standard_file = "1000-unseen-discussions.json"
     output_directory = "predictions"
 
-    process_gold_standard(client, mod_gold_standard_file, model_name=MODEL, output_dir=output_directory)
+    process_gold_standard(mod_gold_standard_file, model_name=MODEL, output_dir=output_directory)
     
-    analyser = PostAnalyser(client=client, model_name=MODEL, shot="multi", temperature=0.6,
-                            chain_of_thought=True, use_structured_output=True)
+    analyser = PostAnalyser(model_name=MODEL, shot="multi", temperature=0.6,
+                          chain_of_thought=True, use_structured_output=True)
     test_text = "I believe that the conclusions reached by the House Select Committee on Assassinations (HSCA) regarding the assassination of JFK on Nov. 22, 1963 are true and accurate. CMV.\n\nI believe that Lee Harvey Oswald assassinated JFK using a single rifle, fired all of the shots that killed him and wounded Gov. Connally, and did so as an individual actor (not as the agent of a nation or organized group). My knowledge of the Kennedy Assassination is admittedly limited; I've studied it in school and participated in several university level class discussions about the investigations and conspiracies surrounding the issue. After looking at the conclusions reached by the Warren Commission, I was somewhat skeptical of the notion that Lee Harvey Oswald acted alone, but the HSCA report clarifies some of the issues surrounding the timing and circumstances of the assassination, and leaves open the idea that Oswald may have had a partner. Additionally, I do feel that the events following the assassination are slightly suspicious (notably LBJ appointing and overseeing the Warren Commission), but are not at present sufficient for me to discount the accepted explanation of the assassination.  The number of conspiracy or alternate theories surrounding the assassination is prodigious and confusing, to say the least, but I am willing to accept an alternate theory and CMV if someone can present a compelling alternate explanation of the JFK assassination supported by clear and provable facts."
     result = analyser.analyse_text(test_text)
     print("\nTest analysis result:")
