@@ -49,6 +49,7 @@ few0.7
 multi0.5
 
 
+8B on TEST
 Top 2 configs for 'few' shot:
   few_shot_temp0.1_cotYes_structuredYes_cv_results.json  Score: 0.5006
 
@@ -62,6 +63,8 @@ Top 2 configs for 'zero' shot:
   zero_shot_temp0.3_cotYes_structuredYes_cv_results.json  Score: -0.2230
 
 Results also saved to: best_4B_configs_per_shot.csv
+
+4B on TEST
 PS C:\RUG\bsc_thesis> & C:/Users/marti/anaconda3/envs/cuda_test/python.exe c:/RUG/bsc_thesis/to-find-best-config.py
 
 Top 2 configs for 'few' shot:
@@ -77,3 +80,7 @@ Top 2 configs for 'zero' shot:
   zero_shot_temp0.6_cotYes_structuredYes_cv_results.json  Score: -0.5569
 
 Results also saved to: best_4B_configs_per_shot.csv
+
+4B - multi 0.5
+8B - few 0.1
+8B - multi 0.2
