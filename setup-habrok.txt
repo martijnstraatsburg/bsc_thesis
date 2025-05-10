@@ -21,7 +21,10 @@ ssh -NL 8000:a100gpu6:8000 s3726134@login2.hb.hpc.rug.nl
 # check http://localhost:8000/v1/models
 
 # FOR PREDICTIONS AND ANALYSES
-srun --nodes=1 --ntasks=1 --partition=gpushort --mem=120G --time=06:00:00 --gres=gpu:a100:1 --pty bash
-source llm/bin/activate
+srun --nodes=1 --ntasks=1 --partition=gpushort --mem=120G --time=02:00:00 --gres=gpu:a100:1 --pty bash
+
+srun --nodes=1 --ntasks=1 --partition=gpu --mem=120G --time=15:00:00 --gres=gpu:a100:1 --pty bash
+
+source $HOME/venvs/llm_env/bin/activate
 vllm serve Qwen/Qwen3-4B --download-dir /tmp/models --max-model-len 4096 --gpu-memory-utilization 0.95 --port 8000
-ssh -NL 8000:a100gpu6:8000 s3726134@login2.hb.hpc.rug.nl
+ssh -NL 8000:a100gpu5:8000 s3726134@login2.hb.hpc.rug.nl

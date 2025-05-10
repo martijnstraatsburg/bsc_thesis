@@ -332,9 +332,6 @@ def process_gold_standard(client, input_file: str, model_name: str = MODEL, outp
         gold_standard = json.load(f)
 
     configurations = [
-        #{"shot": "zero", "temperature": 0.6, "chain_of_thought": True, "use_structured_output": True},
-        #{"shot": "one", "temperature": 0.6, "chain_of_thought": True, "use_structured_output": True},
-        #{"shot": "few", "temperature": 0.6, "chain_of_thought": True, "use_structured_output": True},
         {"shot": "multi", "temperature": 0.5, "chain_of_thought": True, "use_structured_output": True}
     ]
 
@@ -378,7 +375,7 @@ def process_gold_standard(client, input_file: str, model_name: str = MODEL, outp
 if __name__ == "__main__":
     client = OpenAI(base_url=BASEURL, api_key=APIKEY)
 
-    mod_gold_standard_file = "1000-unseen-discussions.json"
+    mod_gold_standard_file = "part_1.json"
     output_directory = "predictions"
 
     process_gold_standard(client, mod_gold_standard_file, model_name=MODEL, output_dir=output_directory)
