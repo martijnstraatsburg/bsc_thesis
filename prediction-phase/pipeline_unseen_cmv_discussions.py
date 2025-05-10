@@ -199,7 +199,7 @@ def process_comment(comment: dict, all_comments: list) -> dict:
     out = {
         "name": comment.get("name", "unk"),
         "author": comment.get("author"),
-        "created_utc": comment.get("retrieved_on", -1),
+        "created_utc": comment.get("created_utc", -1),
         "body": comment.get("body", ""),
         "persuasion_success": comment.get("persuasion_success", 0),
         "parent_id": comment.get("parent_id"),
