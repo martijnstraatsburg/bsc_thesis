@@ -13,6 +13,7 @@ import argparse
 from collections import Counter
 import pandas as pd
 
+
 def parse_args():
     parser = argparse.ArgumentParser(
         description="Generate golden-standard annotations from multiple annotator data")
@@ -24,12 +25,15 @@ def parse_args():
 
 
 def load_data(path):
-    with open(path, 'r', encoding='utf-8') as f:
+    with open(path, "r", encoding="utf-8") as f:
         data = json.load(f)
     for entry in data:
-        entry['suspense_rating'] = [r['rating'] for r in entry.get('suspense', [])]
-        entry['curiosity_rating'] = [r['rating'] for r in entry.get('curiosity', [])]
-        entry['surprise_rating'] = [r['rating'] for r in entry.get('surprise', [])]
+        entry["suspense_rating"] = [r["rating"]
+                                    for r in entry.get("suspense", [])]
+        entry["curiosity_rating"] = [r["rating"]
+                                     for r in entry.get("curiosity", [])]
+        entry["surprise_rating"] = [r["rating"]
+                                    for r in entry.get("surprise", [])]
     return pd.DataFrame(data)
 
 
@@ -46,16 +50,15 @@ def median_round(values):
 
 
 def generate_gold_standard(df):
-    static_cols = [
-        'name', 'id', 'author', 'created_utc', 'body', 'parent_id', 'persuasion_success'
-    ]
+    static_cols = ["name", "id", "author", "created_utc",
+                   "body", "parent_id", "persuasion_success"]
 
     def agg_func(group):
         return {
-            'story_class': majority_vote(group['story_class']),
-            'suspense': median_round(sum(group['suspense_rating'], [])),
-            'curiosity': median_round(sum(group['curiosity_rating'], [])),
-            'surprise': median_round(sum(group['surprise_rating'], [])),
+            "story_class": majority_vote(group["story_class"]),
+            "suspense": median_round(sum(group["suspense_rating"], [])),
+            "curiosity": median_round(sum(group["curiosity_rating"], [])),
+            "surprise": median_round(sum(group["surprise_rating"], [])),
         }
 
     grouped = df.groupby(static_cols).apply(lambda g: pd.Series(agg_func(g)))
@@ -65,22 +68,22 @@ def generate_gold_standard(df):
 
 def write_output(gold_df, path):
     records = []
-    for row in gold_df.to_dict(orient='records'):
+    for row in gold_df.to_dict(orient="records"):
         rec = {
-            'name': row['name'],
-            'id': row['id'],
-            'author': row['author'],
-            'created_utc': row['created_utc'],
-            'body': row['body'],
-            'parent_id': row['parent_id'],
-            'persuasion_success': row['persuasion_success'],
-            'story_class': row['story_class'],
-            'suspense': row['suspense'],
-            'curiosity': row['curiosity'],
-            'surprise': row['surprise'],
+            "name": row["name"],
+            "id": row["id"],
+            "author": row["author"],
+            "created_utc": row["created_utc"],
+            "body": row["body"],
+            "parent_id": row["parent_id"],
+            "persuasion_success": row["persuasion_success"],
+            "story_class": row["story_class"],
+            "suspense": row["suspense"],
+            "curiosity": row["curiosity"],
+            "surprise": row["surprise"],
         }
         records.append(rec)
-    with open(path, 'w', encoding='utf-8') as f:
+    with open(path, "w", encoding="utf-8") as f:
         json.dump(records, f, ensure_ascii=False, indent=2)
 
 
@@ -90,6 +93,8 @@ def main():
     gold = generate_gold_standard(df)
     write_output(gold, args.output)
     print(f"Golden-standard annotations written to {args.output}")
+    # Split done by other group member and results in gs-train.json and gs-test.json
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

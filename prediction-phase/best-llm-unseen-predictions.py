@@ -2,7 +2,9 @@
 
 # Name: qwen3-prompting.py
 # Author: Martijn Straatsburg
-# Description: ...
+# Description: This script prompts either of the Qwen3 models (4B or 8B) with a set of configurations.
+# The configs can be adjusted to have different shot-techniques, temperatures, yes/no Chain-of-Thought, yes/no structured output.
+# Basically the same script as prompt-cv-eval.py, but only prompting for the predictions.
 
 import os
 import pandas as pd
@@ -12,13 +14,14 @@ import json
 from typing import Dict, Any, List, Union
 import copy
 
-BASEURL = 'http://localhost:8000/v1/'
-APIKEY = 'EMPTY'
-MODEL = "Qwen/Qwen3-4B" # Un-comment to use 4B variant
+BASEURL = "http://localhost:8000/v1/"
+APIKEY = "EMPTY"
+# Un-comment to use 4B or 8B variant
+MODEL = "Qwen/Qwen3-4B"
 #MODEL = "Qwen/Qwen3-8B"
 
 class PostAnalyser:
-    def __init__(self, client, model_name: str = MODEL, shot: str = "multi", temperature: float = 0.6, 
+    def __init__(self, client, model_name: str = MODEL, shot: str = "multi", temperature: float = 0.5, 
                  chain_of_thought: bool = True, use_structured_output: bool = True):
         """
         Initialise PostAnalyser with OpenAI client and model parameters.
@@ -204,22 +207,18 @@ You MUST provide the output in a structured JSON format with the following struc
             Dict[str, Any]: Analysis results including story classification and ratings.
         """
         prompt = f"Text to analyse:\n\n{text}"
-
         try:
             messages = [
                 {"role": "system", "content": self.system_prompt},
                 {"role": "user", "content": prompt}
             ]
-
             response = self.client.chat.completions.create(
                 model=self.model,
                 messages=messages,
                 temperature=self.temperature,
                 response_format={"type": "json_object"} if self.use_structured_output else None
             )
-
             response_text = response.choices[0].message.content
-
             try:
                 result = json.loads(response_text)
                 if "story_class" not in result:
@@ -235,11 +234,10 @@ You MUST provide the output in a structured JSON format with the following struc
                             result[key] = max(1, min(5, int(result[key])))
                         except (ValueError, TypeError):
                             result[key] = 1
-                
                 return result
             except json.JSONDecodeError:
                 import re
-                json_match = re.search(r'({.*})', response_text, re.DOTALL)
+                json_match = re.search(r"({.*})", response_text, re.DOTALL)
                 if json_match:
                     try:
                         result = json.loads(json_match.group(1))
@@ -247,7 +245,6 @@ You MUST provide the output in a structured JSON format with the following struc
                             raise ValueError("Missing 'story_class' in response")
                         if result["story_class"] not in ["Story", "Not Story"]:
                             result["story_class"] = "Not Story" if result["story_class"].lower() in ["not story", "not a story", "no story"] else "Story"
-                        
                         for key in ["suspense", "curiosity", "surprise"]:
                             if key not in result:
                                 result[key] = 1
@@ -260,19 +257,16 @@ You MUST provide the output in a structured JSON format with the following struc
                         return result
                     except:
                         pass
-                
                 story_match = re.search(r'story_class["\']\s*:\s*["\']([^"\']+)["\']', response_text, re.IGNORECASE)
                 story_class = "Not Story"
                 if story_match:
                     extracted = story_match.group(1)
                     story_class = "Story" if "story" in extracted.lower() and "not" not in extracted.lower() else "Not Story"
-                
                 ratings = {}
                 for key in ["suspense", "curiosity", "surprise"]:
                     rating_match = re.search(f'{key}["\']\s*:\s*(\d+)', response_text, re.IGNORECASE)
                     ratings[key] = int(rating_match.group(1)) if rating_match else 1
                     ratings[key] = max(1, min(5, ratings[key]))
-                
                 return {
                     "story_class": story_class,
                     "suspense": ratings["suspense"],
@@ -280,7 +274,6 @@ You MUST provide the output in a structured JSON format with the following struc
                     "surprise": ratings["surprise"],
                     "extraction_method": "regex_fallback"
                 }
-
         except Exception as e:
             print(f"Error during analysis: {str(e)}")
             return {
@@ -312,7 +305,7 @@ You MUST provide the output in a structured JSON format with the following struc
             results (List[Dict[str, Any]]): List of analysis results.
             output_file (str): Path to the output JSON file.
         """
-        with open(output_file, 'w', encoding='utf-8') as f:
+        with open(output_file, "w", encoding="utf-8") as f:
             json.dump(results, f, indent=2, ensure_ascii=False)
         print(f"Results saved to {output_file}")
 
@@ -327,18 +320,14 @@ def process_gold_standard(client, input_file: str, model_name: str = MODEL, outp
         output_dir (str): Directory to save the output JSON files.
     """
     os.makedirs(output_dir, exist_ok=True)
-
-    with open(input_file, 'r', encoding='utf-8') as f:
+    with open(input_file, "r", encoding="utf-8") as f:
         gold_standard = json.load(f)
-
     configurations = [
         {"shot": "multi", "temperature": 0.5, "chain_of_thought": True, "use_structured_output": True}
     ]
-
     for config in configurations:
         config_name = f"{config['shot']}_shot_temp{config['temperature']}_cot{'Yes' if config['chain_of_thought'] else 'No'}_structured{'Yes' if config['use_structured_output'] else 'No'}"
         print(f"\n--- Processing with {config_name} ---")
-
         analyser = PostAnalyser(
             client=client, 
             model_name=model_name, 
@@ -347,13 +336,10 @@ def process_gold_standard(client, input_file: str, model_name: str = MODEL, outp
             chain_of_thought=config['chain_of_thought'],
             use_structured_output=config['use_structured_output']
         )
-
         results = copy.deepcopy(gold_standard)
-
         for i, entry in enumerate(tqdm(results, desc=config_name)):
             text = entry["body"]
             analysis = analyser.analyse_text(text)
-
             if "error" not in analysis:
                 entry["story_class"] = analysis["story_class"]
                 entry["suspense"] = analysis["suspense"]
@@ -365,21 +351,18 @@ def process_gold_standard(client, input_file: str, model_name: str = MODEL, outp
                 entry["suspense"] = 1
                 entry["curiosity"] = 1
                 entry["surprise"] = 1
-
         output_file = os.path.join(output_dir, f"gold_standard_{config_name}.json")
-        with open(output_file, 'w', encoding='utf-8') as f:
+        with open(output_file, "w", encoding="utf-8") as f:
             json.dump(results, f, indent=2, ensure_ascii=False)
         print(f"Results for {config_name} saved to {output_file}")
 
 
 if __name__ == "__main__":
     client = OpenAI(base_url=BASEURL, api_key=APIKEY)
-
-    mod_gold_standard_file = "part_1.json"
-    output_directory = "predictions"
-
+    #mod_gold_standard_file = "part_1.json"
+    mod_gold_standard_file = "part_2.json"
+    output_directory = "prediction-phase" # Change filename after or it overwrites
     process_gold_standard(client, mod_gold_standard_file, model_name=MODEL, output_dir=output_directory)
-    
     analyser = PostAnalyser(client=client, model_name=MODEL, shot="multi", temperature=0.6,
                             chain_of_thought=True, use_structured_output=True)
     test_text = "I believe that the conclusions reached by the House Select Committee on Assassinations (HSCA) regarding the assassination of JFK on Nov. 22, 1963 are true and accurate. CMV.\n\nI believe that Lee Harvey Oswald assassinated JFK using a single rifle, fired all of the shots that killed him and wounded Gov. Connally, and did so as an individual actor (not as the agent of a nation or organized group). My knowledge of the Kennedy Assassination is admittedly limited; I've studied it in school and participated in several university level class discussions about the investigations and conspiracies surrounding the issue. After looking at the conclusions reached by the Warren Commission, I was somewhat skeptical of the notion that Lee Harvey Oswald acted alone, but the HSCA report clarifies some of the issues surrounding the timing and circumstances of the assassination, and leaves open the idea that Oswald may have had a partner. Additionally, I do feel that the events following the assassination are slightly suspicious (notably LBJ appointing and overseeing the Warren Commission), but are not at present sufficient for me to discount the accepted explanation of the assassination.  The number of conspiracy or alternate theories surrounding the assassination is prodigious and confusing, to say the least, but I am willing to accept an alternate theory and CMV if someone can present a compelling alternate explanation of the JFK assassination supported by clear and provable facts."
