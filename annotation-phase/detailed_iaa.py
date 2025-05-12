@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 from scipy.stats import pearsonr, spearmanr
 from sklearn.metrics import cohen_kappa_score
 
-with open('names-annotations.json', 'r', encoding='utf-8') as f:
+with open('numbers-annotations.json', 'r', encoding='utf-8') as f:
     data = json.load(f)
 
 content_groups = defaultdict(list)
@@ -238,3 +238,24 @@ for category in categories:
     print(temp_df[['content', category]].head(5))
 
 df_variance.to_csv('content_disagreement.csv')
+
+pivot = df_annotations.pivot(index='name',
+                             columns='annotator',
+                             values='curiosity')
+
+annotators = pivot.columns.tolist()
+w_kappa = pd.DataFrame(index=annotators, columns=annotators, dtype=float)
+
+for i, a1 in enumerate(annotators):
+    for j, a2 in enumerate(annotators):
+        if i == j:
+            w_kappa.loc[a1, a2] = 1.0
+        else:
+            x = pivot[a1].dropna()
+            y = pivot[a2].dropna()
+            common = x.index.intersection(y.index)
+            w_kappa.loc[a1, a2] = cohen_kappa_score(
+                x.loc[common], y.loc[common], weights='quadratic'
+            )
+
+print("\nPairwise quadratic weighted κ for curiosity:\n", w_kappa)

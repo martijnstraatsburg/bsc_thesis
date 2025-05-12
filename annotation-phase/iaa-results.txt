@@ -1,0 +1,111 @@
+PS C:\RUG\bsc_thesis> & C:/Users/marti/anaconda3/envs/cuda_test/python.exe c:/RUG/bsc_thesis/annotation-phase/detailed_iaa.py
+Fleiss' Kappa for story_class: 0.612
+ICC(3,k) for curiosity: 0.673
+ICC(3,k) for surprise: 0.703
+ICC(3,k) for suspense: 0.720
+
+Annotators: ['Annotator 1', 'Annotator 2', 'Annotator 3', 'Annotator 4']
+
+==== Cohen's Kappa for story_class ====
+Annotator 1 vs Annotator 2: 0.399
+Annotator 1 vs Annotator 3: 0.386
+Annotator 1 vs Annotator 4: 0.419
+Annotator 2 vs Annotator 1: 0.399
+Annotator 2 vs Annotator 3: 0.848
+Annotator 2 vs Annotator 4: 0.896
+Annotator 3 vs Annotator 1: 0.386
+Annotator 3 vs Annotator 2: 0.848
+Annotator 3 vs Annotator 4: 0.864
+Annotator 4 vs Annotator 1: 0.419
+Annotator 4 vs Annotator 2: 0.896
+Annotator 4 vs Annotator 3: 0.864
+
+==== Pairwise correlations for curiosity ====
+Annotator 1 vs Annotator 2: Pearson r=0.391 (p=0.000), Spearman rho=0.380 (p=0.000)
+Annotator 1 vs Annotator 3: Pearson r=0.275 (p=0.000), Spearman rho=0.269 (p=0.000)
+Annotator 1 vs Annotator 4: Pearson r=0.235 (p=0.000), Spearman rho=0.224 (p=0.000)
+Annotator 2 vs Annotator 1: Pearson r=0.391 (p=0.000), Spearman rho=0.380 (p=0.000)
+Annotator 2 vs Annotator 3: Pearson r=0.410 (p=0.000), Spearman rho=0.410 (p=0.000)
+Annotator 2 vs Annotator 4: Pearson r=0.309 (p=0.000), Spearman rho=0.306 (p=0.000)
+Annotator 3 vs Annotator 1: Pearson r=0.275 (p=0.000), Spearman rho=0.269 (p=0.000)
+Annotator 3 vs Annotator 2: Pearson r=0.410 (p=0.000), Spearman rho=0.410 (p=0.000)
+Annotator 3 vs Annotator 4: Pearson r=0.433 (p=0.000), Spearman rho=0.437 (p=0.000)
+Annotator 4 vs Annotator 1: Pearson r=0.235 (p=0.000), Spearman rho=0.224 (p=0.000)
+Annotator 4 vs Annotator 2: Pearson r=0.309 (p=0.000), Spearman rho=0.306 (p=0.000)
+Annotator 4 vs Annotator 3: Pearson r=0.433 (p=0.000), Spearman rho=0.437 (p=0.000)
+
+==== Pairwise correlations for surprise ====
+Annotator 1 vs Annotator 2: Pearson r=0.276 (p=0.000), Spearman rho=0.293 (p=0.000)
+Annotator 1 vs Annotator 3: Pearson r=0.323 (p=0.000), Spearman rho=0.320 (p=0.000)
+Annotator 1 vs Annotator 4: Pearson r=0.259 (p=0.000), Spearman rho=0.250 (p=0.000)
+Annotator 2 vs Annotator 1: Pearson r=0.276 (p=0.000), Spearman rho=0.293 (p=0.000)
+Annotator 2 vs Annotator 3: Pearson r=0.368 (p=0.000), Spearman rho=0.375 (p=0.000)
+Annotator 2 vs Annotator 4: Pearson r=0.414 (p=0.000), Spearman rho=0.429 (p=0.000)
+Annotator 3 vs Annotator 1: Pearson r=0.323 (p=0.000), Spearman rho=0.320 (p=0.000)
+Annotator 3 vs Annotator 2: Pearson r=0.368 (p=0.000), Spearman rho=0.375 (p=0.000)
+Annotator 3 vs Annotator 4: Pearson r=0.571 (p=0.000), Spearman rho=0.577 (p=0.000)
+Annotator 4 vs Annotator 1: Pearson r=0.259 (p=0.000), Spearman rho=0.250 (p=0.000)
+Annotator 4 vs Annotator 2: Pearson r=0.414 (p=0.000), Spearman rho=0.429 (p=0.000)
+Annotator 4 vs Annotator 3: Pearson r=0.571 (p=0.000), Spearman rho=0.577 (p=0.000)
+
+==== Pairwise correlations for suspense ====
+Annotator 1 vs Annotator 2: Pearson r=0.347 (p=0.000), Spearman rho=0.354 (p=0.000)
+Annotator 1 vs Annotator 3: Pearson r=0.334 (p=0.000), Spearman rho=0.359 (p=0.000)
+Annotator 1 vs Annotator 4: Pearson r=0.275 (p=0.000), Spearman rho=0.285 (p=0.000)
+Annotator 2 vs Annotator 1: Pearson r=0.347 (p=0.000), Spearman rho=0.354 (p=0.000)
+Annotator 2 vs Annotator 3: Pearson r=0.505 (p=0.000), Spearman rho=0.519 (p=0.000)
+Annotator 2 vs Annotator 4: Pearson r=0.361 (p=0.000), Spearman rho=0.366 (p=0.000)
+Annotator 3 vs Annotator 1: Pearson r=0.334 (p=0.000), Spearman rho=0.359 (p=0.000)
+Annotator 3 vs Annotator 2: Pearson r=0.505 (p=0.000), Spearman rho=0.519 (p=0.000)
+Annotator 3 vs Annotator 4: Pearson r=0.529 (p=0.000), Spearman rho=0.521 (p=0.000)
+Annotator 4 vs Annotator 1: Pearson r=0.275 (p=0.000), Spearman rho=0.285 (p=0.000)
+Annotator 4 vs Annotator 2: Pearson r=0.361 (p=0.000), Spearman rho=0.366 (p=0.000)
+Annotator 4 vs Annotator 3: Pearson r=0.529 (p=0.000), Spearman rho=0.521 (p=0.000)
+
+==== Annotator Rating Patterns ====
+  Annotator  Story%  curiosity  surprise  suspense
+Annotator 1   29.52       2.84      2.59      2.57
+Annotator 2   58.87       2.57      2.09      2.44
+Annotator 3   61.94       2.67      2.59      2.38
+Annotator 4   60.00       2.97      3.04      2.38
+
+==== Content Items with High Disagreement ====
+
+Top disagreements for story_class:
+               content  story_class
+t1_ca24zer  t1_ca24zer       0.1875
+t1_ceprovz  t1_ceprovz       0.1875
+t1_cepre6f  t1_cepre6f       0.1875
+t1_ch33rrs  t1_ch33rrs       0.1875
+t1_c9d39gw  t1_c9d39gw       0.1875
+
+Top disagreements for curiosity:
+               content  curiosity
+t3_242qn0    t3_242qn0     2.7500
+t1_ckydk5a  t1_ckydk5a     2.7500
+t1_cbdodgh  t1_cbdodgh     2.6875
+t1_cgxlked  t1_cgxlked     2.2500
+t1_cat7r28  t1_cat7r28     2.2500
+
+Top disagreements for surprise:
+               content  surprise
+t3_242qn0    t3_242qn0    4.0000
+t1_cpra9u0  t1_cpra9u0    3.1875
+t1_cauc7tb  t1_cauc7tb    3.1875
+t1_ceprjui  t1_ceprjui    3.1875
+t1_cstvpcf  t1_cstvpcf    3.1875
+
+Top disagreements for suspense:
+               content  suspense
+t3_242qn0    t3_242qn0    4.0000
+t1_c95qp1r  t1_c95qp1r    3.1875
+t1_cgxtaif  t1_cgxtaif    3.0000
+t1_ckydk5a  t1_ckydk5a    2.7500
+t1_cav4ico  t1_cav4ico    2.6875
+
+Pairwise quadratic weighted κ for curiosity:
+              Annotator 1  Annotator 2  Annotator 3  Annotator 4
+Annotator 1     1.000000     0.372569     0.270755     0.232800
+Annotator 2     0.372569     1.000000     0.396407     0.282261
+Annotator 3     0.270755     0.396407     1.000000     0.414781
+Annotator 4     0.232800     0.282261     0.414781     1.000000
