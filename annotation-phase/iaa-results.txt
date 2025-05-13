@@ -103,9 +103,38 @@ t1_cgxtaif  t1_cgxtaif    3.0000
 t1_ckydk5a  t1_ckydk5a    2.7500
 t1_cav4ico  t1_cav4ico    2.6875
 
-Pairwise quadratic weighted κ for curiosity:
-              Annotator 1  Annotator 2  Annotator 3  Annotator 4
-Annotator 1     1.000000     0.372569     0.270755     0.232800
-Annotator 2     0.372569     1.000000     0.396407     0.282261
-Annotator 3     0.270755     0.396407     1.000000     0.414781
-Annotator 4     0.232800     0.282261     0.414781     1.000000
+Fleiss' Kappa for story_class: 0.612
+ICC(3,k) for curiosity: 0.673
+ICC(3,k) for surprise: 0.703
+ICC(3,k) for suspense: 0.720
+
+==== Pairwise Cohen's Kappa for story_class ====
+Annotator 1 vs Annotator 2: 0.399
+Annotator 1 vs Annotator 3: 0.386
+Annotator 1 vs Annotator 4: 0.419
+Annotator 2 vs Annotator 3: 0.848
+Annotator 2 vs Annotator 4: 0.896
+Annotator 3 vs Annotator 4: 0.864
+
+==== Pairwise Quadratic Weighted Kappa ====
+
+-- Curiosity --
+             Annotator 1  Annotator 2  Annotator 3  Annotator 4
+Annotator 1        1.000        0.373        0.271        0.233
+Annotator 2        0.373        1.000        0.396        0.282
+Annotator 3        0.271        0.396        1.000        0.415
+Annotator 4        0.233        0.282        0.415        1.000
+
+-- Surprise --
+             Annotator 1  Annotator 2  Annotator 3  Annotator 4
+Annotator 1        1.000        0.247        0.319        0.231
+Annotator 2        0.247        1.000        0.332        0.306
+Annotator 3        0.319        0.332        1.000        0.531
+Annotator 4        0.231        0.306        0.531        1.000
+
+-- Suspense --
+             Annotator 1  Annotator 2  Annotator 3  Annotator 4
+Annotator 1        1.000        0.344        0.329        0.269
+Annotator 2        0.344        1.000        0.503        0.360
+Annotator 3        0.329        0.503        1.000        0.526
+Annotator 4        0.269        0.360        0.526        1.000
