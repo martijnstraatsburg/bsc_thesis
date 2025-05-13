@@ -1,0 +1,92 @@
+=== Post vs Comment Counts ===
+comment: 583
+post: 37
+
+=== Story Class Counts ===
+Story: 361
+Not Story: 259
+
+=== Readers' Perception Counts ===
+
+-- Suspense --
+1: 110
+2: 251
+3: 133
+4: 124
+5: 2
+
+-- Curiosity --
+1: 35
+2: 253
+3: 146
+4: 182
+5: 4
+
+-- Surprise --
+1: 82
+2: 273
+3: 126
+4: 136
+5: 3
+
+TRAIN SET 
+=== Post vs Comment Counts ===
+comment: 407
+post: 27
+
+=== Story Class Counts ===
+Story: 243
+Not Story: 191
+
+=== Readers' Perception Counts ===
+
+-- Suspense --
+1: 87
+2: 164
+3: 94
+4: 87
+5: 2
+
+-- Curiosity --
+1: 25
+2: 193
+3: 94
+4: 119
+5: 3
+
+-- Surprise --
+1: 64
+2: 183
+3: 91
+4: 93
+5: 3
+
+TEST SET
+=== Post vs Comment Counts ===
+comment: 176
+post: 10
+
+=== Story Class Counts ===
+Story: 118
+Not Story: 68
+
+=== Readers' Perception Counts ===
+
+-- Suspense --
+1: 23
+2: 87
+3: 39
+4: 37
+
+-- Curiosity --
+1: 10
+2: 60
+3: 52
+4: 63
+5: 1
+
+-- Surprise --
+1: 18
+2: 90
+3: 35
+4: 43
