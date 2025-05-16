@@ -103,6 +103,13 @@ t1_cgxtaif  t1_cgxtaif    3.0000
 t1_ckydk5a  t1_ckydk5a    2.7500
 t1_cav4ico  t1_cav4ico    2.6875
 
+Pairwise quadratic weighted κ for curiosity:
+              Annotator 1  Annotator 2  Annotator 3  Annotator 4
+Annotator 1     1.000000     0.372569     0.270755     0.232800
+Annotator 2     0.372569     1.000000     0.396407     0.282261
+Annotator 3     0.270755     0.396407     1.000000     0.414781
+Annotator 4     0.232800     0.282261     0.414781     1.000000
+PS C:\RUG\bsc_thesis> & C:/Users/marti/anaconda3/envs/cuda_test/python.exe c:/RUG/bsc_thesis/hidden/calculate_iaa.py
 Fleiss' Kappa for story_class: 0.612
 ICC(3,k) for curiosity: 0.673
 ICC(3,k) for surprise: 0.703
@@ -138,3 +145,4 @@ Annotator 1        1.000        0.344        0.329        0.269
 Annotator 2        0.344        1.000        0.503        0.360
 Annotator 3        0.329        0.503        1.000        0.526
 Annotator 4        0.269        0.360        0.526        1.000
+PS C:\RUG\bsc_thesis>
