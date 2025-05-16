@@ -16,22 +16,17 @@ import copy
 
 BASEURL = "http://localhost:8000/v1/"
 APIKEY = "EMPTY"
-# Un-comment to use 4B or 8B variant
-MODEL = "Qwen/Qwen3-4B"
+# Un-comment to use 1.7B, 4B, 8B or 14B variants of models
+MODEL = "Qwen/Qwen3-1.7B"
+#MODEL = "Qwen/Qwen3-4B"
 #MODEL = "Qwen/Qwen3-8B"
+#MODEL = "Qwen/Qwen3-14B"
 
 class PostAnalyser:
-    def __init__(self, client, model_name: str = MODEL, shot: str = "multi", temperature: float = 0.5, 
+    def __init__(self, client, model_name: str = MODEL, shot: str = "multi", temperature: float = 0.6, 
                  chain_of_thought: bool = True, use_structured_output: bool = True):
         """
-        Initialise PostAnalyser with OpenAI client and model parameters.
-        Args:
-            client: OpenAI client instance.
-            model_name (str): Name of the model to use.
-            shot (str): Shot technique to use ('zero', 'one', 'few', 'multi').
-            temperature (float): Temperature for sampling.
-            chain_of_thought (bool): Whether to use chain of thought reasoning.
-            use_structured_output (bool): Whether to use structured output format.
+        ...
         """
         self.client = client
         self.model = model_name
@@ -200,11 +195,7 @@ You MUST provide the output in a structured JSON format with the following struc
 
     def analyse_text(self, text: str) -> Dict[str, Any]:
         """
-        Analyse the provided text and return structured results.
-        Args:
-            text (str): The text to analyse.
-        Returns:
-            Dict[str, Any]: Analysis results including story classification and ratings.
+        ...
         """
         prompt = f"Text to analyse:\n\n{text}"
         try:
@@ -286,11 +277,7 @@ You MUST provide the output in a structured JSON format with the following struc
 
     def batch_analyse(self, texts: List[str]) -> List[Dict[str, Any]]:
         """
-        Analyse multiple texts and return results for each.
-        Args:
-            texts (List[str]): List of texts to analyse.
-        Returns:
-            List[Dict[str, Any]]: List of analysis results for each text.
+        ...
         """
         results = []
         for text in tqdm(texts, desc="Analyzing texts"):
@@ -300,10 +287,7 @@ You MUST provide the output in a structured JSON format with the following struc
 
     def save_results(self, results: List[Dict[str, Any]], output_file: str) -> None:
         """
-        Save analysis results to a JSON file.
-        Args:
-            results (List[Dict[str, Any]]): List of analysis results.
-            output_file (str): Path to the output JSON file.
+        ...
         """
         with open(output_file, "w", encoding="utf-8") as f:
             json.dump(results, f, indent=2, ensure_ascii=False)
@@ -312,18 +296,13 @@ You MUST provide the output in a structured JSON format with the following struc
 
 def process_gold_standard(client, input_file: str, model_name: str = MODEL, output_dir: str = "results"):
     """
-    Process the dataset with different 'shot' (prompting) techniques.
-    Args:
-        client: OpenAI client instance.
-        input_file (str): Path to the input JSON file containing the dataset.
-        model_name (str): Name of the model to use.
-        output_dir (str): Directory to save the output JSON files.
+    ...
     """
     os.makedirs(output_dir, exist_ok=True)
     with open(input_file, "r", encoding="utf-8") as f:
         gold_standard = json.load(f)
     configurations = [
-        {"shot": "multi", "temperature": 0.5, "chain_of_thought": True, "use_structured_output": True}
+        {"shot": "multi", "temperature": 0.6, "chain_of_thought": True, "use_structured_output": True}
     ]
     for config in configurations:
         config_name = f"{config['shot']}_shot_temp{config['temperature']}_cot{'Yes' if config['chain_of_thought'] else 'No'}_structured{'Yes' if config['use_structured_output'] else 'No'}"
