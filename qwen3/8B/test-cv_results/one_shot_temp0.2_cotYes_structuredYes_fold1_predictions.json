@@ -45,10 +45,10 @@
     "suspense": 3,
     "curiosity": 2,
     "surprise": 2,
-    "predicted_story_class": "Not Story",
-    "predicted_suspense": 1,
-    "predicted_curiosity": 1,
-    "predicted_surprise": 1
+    "predicted_story_class": "Story",
+    "predicted_suspense": 2,
+    "predicted_curiosity": 3,
+    "predicted_surprise": 2
   },
   {
     "name": "t1_cau9jjt",
@@ -251,7 +251,7 @@
     "surprise": 4,
     "predicted_story_class": "Story",
     "predicted_suspense": 3,
-    "predicted_curiosity": 4,
+    "predicted_curiosity": 2,
     "predicted_surprise": 2
   },
   {
@@ -283,10 +283,10 @@
     "suspense": 2,
     "curiosity": 3,
     "surprise": 3,
-    "predicted_story_class": "Story",
-    "predicted_suspense": 3,
-    "predicted_curiosity": 2,
-    "predicted_surprise": 3
+    "predicted_story_class": "Not Story",
+    "predicted_suspense": 1,
+    "predicted_curiosity": 1,
+    "predicted_surprise": 1
   },
   {
     "name": "t1_ceprjui",
@@ -302,8 +302,8 @@
     "surprise": 4,
     "predicted_story_class": "Story",
     "predicted_suspense": 3,
-    "predicted_curiosity": 4,
-    "predicted_surprise": 2
+    "predicted_curiosity": 2,
+    "predicted_surprise": 4
   },
   {
     "name": "t1_cer1v34",
@@ -370,7 +370,7 @@
     "surprise": 2,
     "predicted_story_class": "Story",
     "predicted_suspense": 3,
-    "predicted_curiosity": 4,
+    "predicted_curiosity": 3,
     "predicted_surprise": 2
   },
   {
@@ -422,7 +422,7 @@
     "predicted_story_class": "Story",
     "predicted_suspense": 3,
     "predicted_curiosity": 4,
-    "predicted_surprise": 3
+    "predicted_surprise": 2
   },
   {
     "name": "t1_chjfhp9",
@@ -471,9 +471,9 @@
     "curiosity": 2,
     "surprise": 2,
     "predicted_story_class": "Story",
-    "predicted_suspense": 2,
+    "predicted_suspense": 3,
     "predicted_curiosity": 3,
-    "predicted_surprise": 3
+    "predicted_surprise": 2
   },
   {
     "name": "t1_cicwthx",
@@ -640,9 +640,9 @@
     "suspense": 3,
     "curiosity": 4,
     "surprise": 3,
-    "predicted_story_class": "Story",
-    "predicted_suspense": 3,
-    "predicted_curiosity": 4,
+    "predicted_story_class": "Not Story",
+    "predicted_suspense": 1,
+    "predicted_curiosity": 2,
     "predicted_surprise": 2
   }
 ]

@@ -182,7 +182,7 @@
     "curiosity": 3,
     "surprise": 2,
     "predicted_story_class": "Not Story",
-    "predicted_suspense": 2,
+    "predicted_suspense": 1,
     "predicted_curiosity": 2,
     "predicted_surprise": 1
   },
@@ -354,7 +354,7 @@
     "predicted_story_class": "Story",
     "predicted_suspense": 3,
     "predicted_curiosity": 4,
-    "predicted_surprise": 4
+    "predicted_surprise": 5
   },
   {
     "name": "t1_cbomaor",
@@ -590,8 +590,8 @@
     "curiosity": 4,
     "surprise": 2,
     "predicted_story_class": "Story",
-    "predicted_suspense": 2,
-    "predicted_curiosity": 3,
+    "predicted_suspense": 3,
+    "predicted_curiosity": 2,
     "predicted_surprise": 2
   },
   {

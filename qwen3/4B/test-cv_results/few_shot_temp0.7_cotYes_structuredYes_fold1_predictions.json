@@ -12,8 +12,8 @@
     "curiosity": 4,
     "surprise": 4,
     "predicted_story_class": "Story",
-    "predicted_suspense": 2,
-    "predicted_curiosity": 3,
+    "predicted_suspense": 3,
+    "predicted_curiosity": 4,
     "predicted_surprise": 3
   },
   {
@@ -63,8 +63,8 @@
     "curiosity": 4,
     "surprise": 2,
     "predicted_story_class": "Not Story",
-    "predicted_suspense": 2,
-    "predicted_curiosity": 1,
+    "predicted_suspense": 1,
+    "predicted_curiosity": 2,
     "predicted_surprise": 1
   },
   {
@@ -116,7 +116,7 @@
     "predicted_story_class": "Story",
     "predicted_suspense": 3,
     "predicted_curiosity": 4,
-    "predicted_surprise": 3
+    "predicted_surprise": 2
   },
   {
     "name": "t1_caunbp5",
@@ -148,9 +148,9 @@
     "curiosity": 2,
     "surprise": 2,
     "predicted_story_class": "Not Story",
-    "predicted_suspense": 2,
-    "predicted_curiosity": 3,
-    "predicted_surprise": 1
+    "predicted_suspense": 3,
+    "predicted_curiosity": 2,
+    "predicted_surprise": 2
   },
   {
     "name": "t1_cauqlq8",
@@ -166,7 +166,7 @@
     "surprise": 3,
     "predicted_story_class": "Story",
     "predicted_suspense": 3,
-    "predicted_curiosity": 3,
+    "predicted_curiosity": 4,
     "predicted_surprise": 3
   },
   {
@@ -199,8 +199,8 @@
     "curiosity": 4,
     "surprise": 4,
     "predicted_story_class": "Not Story",
-    "predicted_suspense": 2,
-    "predicted_curiosity": 2,
+    "predicted_suspense": 1,
+    "predicted_curiosity": 1,
     "predicted_surprise": 1
   },
   {
@@ -216,9 +216,9 @@
     "curiosity": 2,
     "surprise": 2,
     "predicted_story_class": "Not Story",
-    "predicted_suspense": 3,
-    "predicted_curiosity": 2,
-    "predicted_surprise": 3
+    "predicted_suspense": 2,
+    "predicted_curiosity": 3,
+    "predicted_surprise": 2
   },
   {
     "name": "t1_cavna3e",
@@ -234,8 +234,8 @@
     "surprise": 3,
     "predicted_story_class": "Story",
     "predicted_suspense": 3,
-    "predicted_curiosity": 4,
-    "predicted_surprise": 5
+    "predicted_curiosity": 2,
+    "predicted_surprise": 4
   },
   {
     "name": "t1_cayikrk",
@@ -252,7 +252,7 @@
     "predicted_story_class": "Story",
     "predicted_suspense": 3,
     "predicted_curiosity": 4,
-    "predicted_surprise": 2
+    "predicted_surprise": 3
   },
   {
     "name": "t1_cb1amc8",
@@ -301,7 +301,7 @@
     "curiosity": 4,
     "surprise": 4,
     "predicted_story_class": "Story",
-    "predicted_suspense": 5,
+    "predicted_suspense": 4,
     "predicted_curiosity": 3,
     "predicted_surprise": 5
   },
@@ -335,8 +335,8 @@
     "curiosity": 4,
     "surprise": 4,
     "predicted_story_class": "Story",
-    "predicted_suspense": 2,
-    "predicted_curiosity": 3,
+    "predicted_suspense": 3,
+    "predicted_curiosity": 4,
     "predicted_surprise": 2
   },
   {
@@ -405,7 +405,7 @@
     "predicted_story_class": "Story",
     "predicted_suspense": 3,
     "predicted_curiosity": 4,
-    "predicted_surprise": 2
+    "predicted_surprise": 3
   },
   {
     "name": "t1_ch7cvu3",
@@ -524,7 +524,7 @@
     "predicted_story_class": "Story",
     "predicted_suspense": 4,
     "predicted_curiosity": 3,
-    "predicted_surprise": 5
+    "predicted_surprise": 4
   },
   {
     "name": "t1_cl6aecx",
@@ -607,8 +607,8 @@
     "curiosity": 2,
     "surprise": 2,
     "predicted_story_class": "Not Story",
-    "predicted_suspense": 1,
-    "predicted_curiosity": 1,
+    "predicted_suspense": 2,
+    "predicted_curiosity": 3,
     "predicted_surprise": 1
   },
   {

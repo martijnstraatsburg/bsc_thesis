@@ -96,10 +96,10 @@
     "suspense": 2,
     "curiosity": 2,
     "surprise": 2,
-    "predicted_story_class": "Story",
-    "predicted_suspense": 2,
-    "predicted_curiosity": 3,
-    "predicted_surprise": 2
+    "predicted_story_class": "Not Story",
+    "predicted_suspense": 1,
+    "predicted_curiosity": 1,
+    "predicted_surprise": 1
   },
   {
     "name": "t1_caunrrz",
@@ -114,7 +114,7 @@
     "curiosity": 3,
     "surprise": 4,
     "predicted_story_class": "Story",
-    "predicted_suspense": 2,
+    "predicted_suspense": 3,
     "predicted_curiosity": 3,
     "predicted_surprise": 3
   },
@@ -131,8 +131,8 @@
     "curiosity": 4,
     "surprise": 4,
     "predicted_story_class": "Story",
-    "predicted_suspense": 2,
-    "predicted_curiosity": 3,
+    "predicted_suspense": 3,
+    "predicted_curiosity": 4,
     "predicted_surprise": 2
   },
   {
@@ -147,10 +147,10 @@
     "suspense": 3,
     "curiosity": 3,
     "surprise": 3,
-    "predicted_story_class": "Story",
-    "predicted_suspense": 2,
-    "predicted_curiosity": 3,
-    "predicted_surprise": 2
+    "predicted_story_class": "Not Story",
+    "predicted_suspense": 1,
+    "predicted_curiosity": 1,
+    "predicted_surprise": 1
   },
   {
     "name": "t1_cauqht4",
@@ -233,7 +233,7 @@
     "curiosity": 3,
     "surprise": 4,
     "predicted_story_class": "Story",
-    "predicted_suspense": 3,
+    "predicted_suspense": 2,
     "predicted_curiosity": 3,
     "predicted_surprise": 2
   },
@@ -335,8 +335,8 @@
     "curiosity": 3,
     "surprise": 3,
     "predicted_story_class": "Story",
-    "predicted_suspense": 4,
-    "predicted_curiosity": 3,
+    "predicted_suspense": 3,
+    "predicted_curiosity": 4,
     "predicted_surprise": 2
   },
   {
@@ -403,9 +403,9 @@
     "curiosity": 4,
     "surprise": 4,
     "predicted_story_class": "Story",
-    "predicted_suspense": 3,
-    "predicted_curiosity": 4,
-    "predicted_surprise": 2
+    "predicted_suspense": 2,
+    "predicted_curiosity": 3,
+    "predicted_surprise": 3
   },
   {
     "name": "t1_cer1win",
@@ -438,7 +438,7 @@
     "surprise": 3,
     "predicted_story_class": "Story",
     "predicted_suspense": 3,
-    "predicted_curiosity": 3,
+    "predicted_curiosity": 4,
     "predicted_surprise": 2
   },
   {
@@ -607,9 +607,9 @@
     "curiosity": 4,
     "surprise": 4,
     "predicted_story_class": "Story",
-    "predicted_suspense": 2,
-    "predicted_curiosity": 3,
-    "predicted_surprise": 2
+    "predicted_suspense": 3,
+    "predicted_curiosity": 4,
+    "predicted_surprise": 3
   },
   {
     "name": "t3_1v8eur",
