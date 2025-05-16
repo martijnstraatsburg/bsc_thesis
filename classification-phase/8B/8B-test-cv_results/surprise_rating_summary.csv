@@ -1,0 +1,5 @@
+Configuration,Perfect Accuracy,Off-by-One Accuracy,Level Accuracy (Low/Med/High),RMSE,MAE,Quadratic Weighted Kappa
+zero_shot_temp0.6_cotYes_structuredYes,0.3225 ± 0.0850,0.7747 ± 0.0604,0.5805 ± 0.0703,1.2579 ± 0.1139,0.9512 ± 0.1349,0.2648 ± 0.0913
+one_shot_temp0.6_cotYes_structuredYes,0.3065 ± 0.1008,0.8333 ± 0.0552,0.5057 ± 0.0860,1.1786 ± 0.1416,0.9033 ± 0.1714,0.3051 ± 0.1471
+few_shot_temp0.6_cotYes_structuredYes,0.3009 ± 0.0722,0.8602 ± 0.0360,0.3974 ± 0.0639,1.1022 ± 0.1062,0.8605 ± 0.1069,0.2963 ± 0.1735
+multi_shot_temp0.6_cotYes_structuredYes,0.3441 ± 0.0670,0.8818 ± 0.0211,0.3976 ± 0.0651,1.0158 ± 0.0761,0.7795 ± 0.0896,0.2387 ± 0.1165
