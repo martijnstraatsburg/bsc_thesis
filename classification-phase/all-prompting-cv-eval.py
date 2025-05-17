@@ -27,16 +27,19 @@ from iterstrat.ml_stratifiers import MultilabelStratifiedKFold
 
 BASEURL = "http://localhost:8000/v1/"
 APIKEY = "EMPTY"
-# Un-comment to use 1.7B, 4B, 8B or 14B variants of models
-MODEL = "Qwen/Qwen3-1.7B"
+# Un-comment to use variants of the Qwen2.5 and Qwen3 models
+MODEL = "Qwen/Qwen2.5-3B-Instruct"
+#MODEL = "Qwen/Qwen2.5-7B-Instruct"
 #MODEL = "Qwen/Qwen3-4B"
 #MODEL = "Qwen/Qwen3-8B"
+
+#MODEL = "Qwen/Qwen3-1.7B"
 #MODEL = "Qwen/Qwen3-14B"
 
 
 class CrossValidationEvaluator:
     """..."""
-    def __init__(self, client, input_file: str, n_splits: int = 5, output_dir: str = "1.7B-test-cv_results"):
+    def __init__(self, client, input_file: str, n_splits: int = 5, output_dir: str = "3B-Instruct-test-cv_results"):
         """..."""
         self.client = client
         self.n_splits = n_splits
@@ -73,11 +76,16 @@ class CrossValidationEvaluator:
         self.kf = MultilabelStratifiedKFold(n_splits=n_splits, shuffle=True, random_state=42)
         self.split_indices = list(self.kf.split(self.dataset, y))
         self.configurations = [
-            # Standard configs for all models
-            {"shot": "zero", "temperature": 0.6, "chain_of_thought": True, "use_structured_output": True},
-            {"shot": "one", "temperature": 0.6, "chain_of_thought": True, "use_structured_output": True},
-            {"shot": "few", "temperature": 0.6, "chain_of_thought": True, "use_structured_output": True},
-            {"shot": "multi", "temperature": 0.6, "chain_of_thought": True, "use_structured_output": True}
+            # Standard configs for all Qwen3 models
+            #{"shot": "zero", "temperature": 0.6, "chain_of_thought": True, "use_structured_output": True},
+            #{"shot": "one", "temperature": 0.6, "chain_of_thought": True, "use_structured_output": True},
+            #{"shot": "few", "temperature": 0.6, "chain_of_thought": True, "use_structured_output": True},
+            #{"shot": "multi", "temperature": 0.6, "chain_of_thought": True, "use_structured_output": True}
+            # Standard configs for all Qwen2.5 models
+            {"shot": "zero", "temperature": 0.7, "chain_of_thought": True, "use_structured_output": True},
+            {"shot": "one", "temperature": 0.7, "chain_of_thought": True, "use_structured_output": True},
+            {"shot": "few", "temperature": 0.7, "chain_of_thought": True, "use_structured_output": True},
+            {"shot": "multi", "temperature": 0.7, "chain_of_thought": True, "use_structured_output": True}
         ]
 
     def run_cross_validation(self, model_name: str = MODEL):

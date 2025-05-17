@@ -1,3 +1,4 @@
+# Author: Martijn Straatsburg
 # FIRST TIME SETUP!
 # Login into Habrok with account via MobaXterm; see https://wiki.hpc.rug.nl/habrok/connecting_to_the_system/windows
 # Start interactive job on single GPU A100 node; adjust time to whatever, but shorter time usually gets prio over longer time
@@ -36,10 +37,12 @@ srun --nodes=1 --ntasks=1 --partition=gpu --mem=120G --time=04:00:00 --gres=gpu:
 
 source $HOME/venvs/llm_env/bin/activate
 
+vllm serve Qwen/Qwen2.5-3B-Instruct --download-dir /tmp/models --max-model-len 4096 --gpu-memory-utilization 0.95 --port 8000
+vllm serve Qwen/Qwen2.5-7B-Instruct --download-dir /tmp/models --max-model-len 4096 --gpu-memory-utilization 0.95 --port 8000
 vllm serve Qwen/Qwen3-1.7B --download-dir /tmp/models --max-model-len 4096 --gpu-memory-utilization 0.95 --port 8000
 vllm serve Qwen/Qwen3-4B --download-dir /tmp/models --max-model-len 4096 --gpu-memory-utilization 0.95 --port 8000
 vllm serve Qwen/Qwen3-8B --download-dir /tmp/models --max-model-len 4096 --gpu-memory-utilization 0.95 --port 8000
 vllm serve Qwen/Qwen3-14B --download-dir /tmp/models --max-model-len 4096 --gpu-memory-utilization 0.95 --port 8000
 
 # 2ND TERMINAL
-ssh -NL 8000:a100gpu6:8000 s3726134@login2.hb.hpc.rug.nl
+ssh -NL 8000:a100gpu2:8000 s3726134@login2.hb.hpc.rug.nl
