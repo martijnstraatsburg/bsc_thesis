@@ -1,0 +1,5 @@
+Configuration,Macro Precision (≤2.5/>2.5),Macro Recall (≤2.5/>2.5),Macro F1 (≤2.5/>2.5),Weighted Precision (≤2.5/>2.5),Weighted Recall (≤2.5/>2.5),Weighted F1 (≤2.5/>2.5)
+zero_shot_temp0.6_cotYes_structuredYes,0.6603 ± 0.0571,0.6420 ± 0.0655,0.6391 ± 0.0672,0.6672 ± 0.0574,0.6721 ± 0.0518,0.6585 ± 0.0603
+one_shot_temp0.6_cotYes_structuredYes,0.6653 ± 0.0871,0.6664 ± 0.0927,0.6441 ± 0.0972,0.6860 ± 0.0885,0.6457 ± 0.0964,0.6439 ± 0.1001
+few_shot_temp0.6_cotYes_structuredYes,0.6736 ± 0.0668,0.6674 ± 0.0678,0.6382 ± 0.0723,0.6976 ± 0.0687,0.6397 ± 0.0721,0.6357 ± 0.0749
+multi_shot_temp0.6_cotYes_structuredYes,0.6832 ± 0.0315,0.6647 ± 0.0351,0.6244 ± 0.0481,0.7112 ± 0.0360,0.6290 ± 0.0432,0.6188 ± 0.0536
