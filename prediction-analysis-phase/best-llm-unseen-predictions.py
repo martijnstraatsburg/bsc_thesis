@@ -16,11 +16,8 @@ import copy
 
 BASEURL = "http://localhost:8000/v1/"
 APIKEY = "EMPTY"
-# Un-comment to use 1.7B, 4B, 8B or 14B variants of models
-MODEL = "Qwen/Qwen3-1.7B"
-#MODEL = "Qwen/Qwen3-4B"
-#MODEL = "Qwen/Qwen3-8B"
-#MODEL = "Qwen/Qwen3-14B"
+MODEL = "Qwen/Qwen3-4B"
+
 
 class PostAnalyser:
     def __init__(self, client, model_name: str = MODEL, shot: str = "multi", temperature: float = 0.6, 
@@ -302,7 +299,7 @@ def process_gold_standard(client, input_file: str, model_name: str = MODEL, outp
     with open(input_file, "r", encoding="utf-8") as f:
         gold_standard = json.load(f)
     configurations = [
-        {"shot": "multi", "temperature": 0.6, "chain_of_thought": True, "use_structured_output": True}
+        {"shot": "few", "temperature": 0.6, "chain_of_thought": True, "use_structured_output": True}
     ]
     for config in configurations:
         config_name = f"{config['shot']}_shot_temp{config['temperature']}_cot{'Yes' if config['chain_of_thought'] else 'No'}_structured{'Yes' if config['use_structured_output'] else 'No'}"
@@ -338,8 +335,7 @@ def process_gold_standard(client, input_file: str, model_name: str = MODEL, outp
 
 if __name__ == "__main__":
     client = OpenAI(base_url=BASEURL, api_key=APIKEY)
-    #mod_gold_standard_file = "part_1.json"
-    mod_gold_standard_file = "part_2.json"
+    mod_gold_standard_file = "part_1.json"
     output_directory = "prediction-phase" # Change filename after or it overwrites
     process_gold_standard(client, mod_gold_standard_file, model_name=MODEL, output_dir=output_directory)
     analyser = PostAnalyser(client=client, model_name=MODEL, shot="multi", temperature=0.6,
