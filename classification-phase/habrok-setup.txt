@@ -39,10 +39,9 @@ source $HOME/venvs/llm_env/bin/activate
 
 vllm serve Qwen/Qwen2.5-3B-Instruct --download-dir /tmp/models --max-model-len 4096 --gpu-memory-utilization 0.95 --port 8000
 vllm serve Qwen/Qwen2.5-7B-Instruct --download-dir /tmp/models --max-model-len 4096 --gpu-memory-utilization 0.95 --port 8000
-vllm serve Qwen/Qwen3-1.7B --download-dir /tmp/models --max-model-len 4096 --gpu-memory-utilization 0.95 --port 8000
+
 vllm serve Qwen/Qwen3-4B --download-dir /tmp/models --max-model-len 4096 --gpu-memory-utilization 0.95 --port 8000
 vllm serve Qwen/Qwen3-8B --download-dir /tmp/models --max-model-len 4096 --gpu-memory-utilization 0.95 --port 8000
-vllm serve Qwen/Qwen3-14B --download-dir /tmp/models --max-model-len 4096 --gpu-memory-utilization 0.95 --port 8000
 
 # 2ND TERMINAL
 ssh -NL 8000:a100gpu2:8000 s3726134@login2.hb.hpc.rug.nl

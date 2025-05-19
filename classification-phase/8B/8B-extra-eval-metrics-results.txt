@@ -1,0 +1,108 @@
+---8B---
+--zero--
+=== Mean & Std across folds ===
+curiosity_bin_acc        : mean 0.6937, std 0.0637
+curiosity_f1_macro       : mean 0.1888, std 0.0332
+curiosity_f1_weighted    : mean 0.2429, std 0.0366
+curiosity_lv_acc         : mean 0.2795, std 0.0486
+curiosity_p_macro        : mean 0.2355, std 0.0513
+curiosity_p_weighted     : mean 0.3535, std 0.1024
+curiosity_r_macro        : mean 0.3281, std 0.0275
+curiosity_r_weighted     : mean 0.2525, std 0.0512
+surprise_bin_acc         : mean 0.6452, std 0.0744
+surprise_f1_macro        : mean 0.1840, std 0.0756
+surprise_f1_weighted     : mean 0.2840, std 0.1081
+surprise_lv_acc          : mean 0.1885, std 0.0550
+surprise_p_macro         : mean 0.2010, std 0.1527
+surprise_p_weighted      : mean 0.3259, std 0.1992
+surprise_r_macro         : mean 0.2987, std 0.0761
+surprise_r_weighted      : mean 0.3225, std 0.0950
+suspense_bin_acc         : mean 0.6666, std 0.0497
+suspense_f1_macro        : mean 0.2014, std 0.0567
+suspense_f1_weighted     : mean 0.2509, std 0.0885
+suspense_lv_acc          : mean 0.2095, std 0.0339
+suspense_p_macro         : mean 0.2562, std 0.1235
+suspense_p_weighted      : mean 0.3585, std 0.1395
+suspense_r_macro         : mean 0.3048, std 0.0300
+suspense_r_weighted      : mean 0.2848, std 0.0837
+
+--one--
+=== Mean & Std across folds ===
+curiosity_bin_acc        : mean 0.7149, std 0.0850
+curiosity_f1_macro       : mean 0.2288, std 0.0758
+curiosity_f1_weighted    : mean 0.3054, std 0.0941
+curiosity_lv_acc         : mean 0.2795, std 0.0486
+curiosity_p_macro        : mean 0.2472, std 0.0778
+curiosity_p_weighted     : mean 0.3618, std 0.1121
+curiosity_r_macro        : mean 0.3213, std 0.1119
+curiosity_r_weighted     : mean 0.3064, std 0.0925
+surprise_bin_acc         : mean 0.6075, std 0.0886
+surprise_f1_macro        : mean 0.2313, std 0.0886
+surprise_f1_weighted     : mean 0.2940, std 0.1168
+surprise_lv_acc          : mean 0.1885, std 0.0550
+surprise_p_macro         : mean 0.2611, std 0.1136
+surprise_p_weighted      : mean 0.3725, std 0.1599
+surprise_r_macro         : mean 0.3143, std 0.0897
+surprise_r_weighted      : mean 0.3065, std 0.1127
+suspense_bin_acc         : mean 0.5701, std 0.0899
+suspense_f1_macro        : mean 0.2079, std 0.0699
+suspense_f1_weighted     : mean 0.2163, std 0.0949
+suspense_lv_acc          : mean 0.2095, std 0.0339
+suspense_p_macro         : mean 0.2837, std 0.1365
+suspense_p_weighted      : mean 0.3479, std 0.1648
+suspense_r_macro         : mean 0.3141, std 0.0729
+suspense_r_weighted      : mean 0.2743, std 0.0983
+
+--few--
+=== Mean & Std across folds ===
+curiosity_bin_acc        : mean 0.6824, std 0.0742
+curiosity_f1_macro       : mean 0.3128, std 0.0738
+curiosity_f1_weighted    : mean 0.4117, std 0.0599
+curiosity_lv_acc         : mean 0.2795, std 0.0486
+curiosity_p_macro        : mean 0.3216, std 0.0572
+curiosity_p_weighted     : mean 0.4605, std 0.0464
+curiosity_r_macro        : mean 0.3829, std 0.0997
+curiosity_r_weighted     : mean 0.4084, std 0.0653
+surprise_bin_acc         : mean 0.5587, std 0.1246
+surprise_f1_macro        : mean 0.2413, std 0.0596
+surprise_f1_weighted     : mean 0.3111, std 0.0844
+surprise_lv_acc          : mean 0.1885, std 0.0550
+surprise_p_macro         : mean 0.2817, std 0.0740
+surprise_p_weighted      : mean 0.4069, std 0.1227
+surprise_r_macro         : mean 0.2816, std 0.0468
+surprise_r_weighted      : mean 0.3009, std 0.0807
+suspense_bin_acc         : mean 0.6023, std 0.0426
+suspense_f1_macro        : mean 0.2590, std 0.0595
+suspense_f1_weighted     : mean 0.3108, std 0.0614
+suspense_lv_acc          : mean 0.2095, std 0.0339
+suspense_p_macro         : mean 0.3550, std 0.1105
+suspense_p_weighted      : mean 0.5028, std 0.1063
+suspense_r_macro         : mean 0.3257, std 0.0785
+suspense_r_weighted      : mean 0.3333, std 0.0775
+
+--multi--
+=== Mean & Std across folds ===
+curiosity_bin_acc        : mean 0.6937, std 0.0718
+curiosity_f1_macro       : mean 0.3259, std 0.1088
+curiosity_f1_weighted    : mean 0.4358, std 0.0753
+curiosity_lv_acc         : mean 0.2795, std 0.0486
+curiosity_p_macro        : mean 0.3336, std 0.1034
+curiosity_p_weighted     : mean 0.4574, std 0.0827
+curiosity_r_macro        : mean 0.3387, std 0.1168
+curiosity_r_weighted     : mean 0.4464, std 0.0713
+surprise_bin_acc         : mean 0.5481, std 0.0769
+surprise_f1_macro        : mean 0.2584, std 0.0612
+surprise_f1_weighted     : mean 0.3415, std 0.0627
+surprise_lv_acc          : mean 0.1885, std 0.0550
+surprise_p_macro         : mean 0.3511, std 0.0685
+surprise_p_weighted      : mean 0.4521, std 0.0730
+surprise_r_macro         : mean 0.2706, std 0.0615
+surprise_r_weighted      : mean 0.3441, std 0.0749
+suspense_bin_acc         : mean 0.6290, std 0.0295
+suspense_f1_macro        : mean 0.2980, std 0.0909
+suspense_f1_weighted     : mean 0.4184, std 0.0864
+suspense_lv_acc          : mean 0.2095, std 0.0339
+suspense_p_macro         : mean 0.4136, std 0.1185
+suspense_p_weighted      : mean 0.5517, std 0.1467
+suspense_r_macro         : mean 0.3199, std 0.0813
+suspense_r_weighted      : mean 0.4252, std 0.0645

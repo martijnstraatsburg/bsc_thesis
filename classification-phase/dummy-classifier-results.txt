@@ -1,0 +1,45 @@
+likert
+story_class
+acc. - 0.6344
+f1 macro - 0.3882
+f1 wavg - 0.4925
+suspense
+acc. - 0.4677
+f1 macro - 0.1593
+f1 wavg - 0.29812
+curiosity
+acc. - 0.3387
+f1 macro - 0.1012
+f1 wavg - 0.1714
+surprise
+acc. - 0.4839
+f1 macro - 0.1630
+f1 wavg - 0.3156
+
+low/med/high
+suspense
+acc. - 0.5914
+f1 macro - 0.2477
+f1 wavg - 0.4396
+curiosity
+acc. - 0.3763
+f1 macro - 0.1823
+f1 wavg - 0.2058
+surprise
+acc. - 0.5806
+f1 macro - 0.2449
+f1 wavg - 0.4266
+
+binary
+suspense
+acc. - 0.5914
+f1 macro - 0.3716
+f1 wavg - 0.4396
+curiosity
+acc. - 0.6237
+f1 macro - 0.3841
+f1 wavg - 0.4791
+surprise
+acc. - 0.5806
+f1 macro - 0.3673
+f1 wavg - 0.4266
