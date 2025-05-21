@@ -1,0 +1,246 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\usepackage[margin=1in]{geometry}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{graphicx}
+\makeatletter
+\newsavebox\pandoc@box
+\newcommand*\pandocbounded[1]{% scales image to fit in text height/width
+  \sbox\pandoc@box{#1}%
+  \Gscale@div\@tempa{\textheight}{\dimexpr\ht\pandoc@box+\dp\pandoc@box\relax}%
+  \Gscale@div\@tempb{\linewidth}{\wd\pandoc@box}%
+  \ifdim\@tempb\p@<\@tempa\p@\let\@tempa\@tempb\fi% select the smaller of both
+  \ifdim\@tempa\p@<\p@\scalebox{\@tempa}{\usebox\pandoc@box}%
+  \else\usebox{\pandoc@box}%
+  \fi%
+}
+% Set default figure placement to htbp
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\usepackage{bookmark}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+\hypersetup{
+  pdftitle={Assignment 4 - Data Visualization},
+  pdfauthor={Martijn Straatsburg - S3726134},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\title{Assignment 4 - Data Visualization}
+\author{Martijn Straatsburg - S3726134}
+\date{May 19, 2025}
+
+\begin{document}
+\maketitle
+
+\subsection{Visualization}\label{visualization}
+
+\subsubsection{Packages \& Data}\label{packages-data}
+
+This is a historical dataset on the modern Olympic Games, including all
+the Games from Athens 1896 to Rio 2016. The data was retrieved from
+\href{https://www.kaggle.com/heesoo37/120-years-of-olympic-history-athletes-and-results}{here}.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(ggplot2)}
+\CommentTok{\# To suppress the conflicts of the packages with base R functions}
+\FunctionTok{suppressPackageStartupMessages}\NormalTok{(}\FunctionTok{library}\NormalTok{(tidyverse))}
+\FunctionTok{suppressPackageStartupMessages}\NormalTok{(}\FunctionTok{library}\NormalTok{(dplyr))}
+\NormalTok{data  }\OtherTok{\textless{}{-}} \FunctionTok{read.csv}\NormalTok{(}\StringTok{"https://stulp.gmw.rug.nl/dataviz/athlete\_events.csv"}\NormalTok{, }
+                 \AttributeTok{header =} \ConstantTok{TRUE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\subsubsection{Code to create
+visualization}\label{code-to-create-visualization}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Load Athletics data from 1928 \& 2016 and filter out NA\textquotesingle{}s}
+\NormalTok{athl\_data }\OtherTok{\textless{}{-}}\NormalTok{ data }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{filter}\NormalTok{(Sport }\SpecialCharTok{==} \StringTok{"Athletics"}\NormalTok{,}
+\NormalTok{         Year }\SpecialCharTok{\%in\%} \FunctionTok{c}\NormalTok{(}\DecValTok{1928}\NormalTok{, }\DecValTok{2016}\NormalTok{)) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{filter}\NormalTok{(}\SpecialCharTok{!}\FunctionTok{is.na}\NormalTok{(Height), }\SpecialCharTok{!}\FunctionTok{is.na}\NormalTok{(Weight))}
+
+\CommentTok{\# Create Olympic theme}
+\NormalTok{olympic\_theme }\OtherTok{\textless{}{-}} \FunctionTok{theme}\NormalTok{(}
+  \AttributeTok{panel.background =} \FunctionTok{element\_rect}\NormalTok{(}\AttributeTok{fill =} \StringTok{"\#ffffea"}\NormalTok{),}
+  \AttributeTok{panel.border =} \FunctionTok{element\_rect}\NormalTok{(}\AttributeTok{linewidth =} \DecValTok{4}\NormalTok{, }\AttributeTok{colour =} \StringTok{"\#cfa093"}\NormalTok{, }\AttributeTok{fill =} \ConstantTok{NA}\NormalTok{),}
+  \AttributeTok{plot.background =} \FunctionTok{element\_rect}\NormalTok{(}\AttributeTok{fill =} \StringTok{"\#ac6f82"}\NormalTok{),}
+  \AttributeTok{panel.grid.major =} \FunctionTok{element\_line}\NormalTok{(}\AttributeTok{colour =} \StringTok{"\#660e60"}\NormalTok{),}
+  \AttributeTok{panel.grid.minor =} \FunctionTok{element\_line}\NormalTok{(}\AttributeTok{colour =} \StringTok{"\#660e60"}\NormalTok{),}
+  \AttributeTok{axis.title =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{face =} \StringTok{"bold"}\NormalTok{, }\AttributeTok{colour =} \StringTok{"\#660e60"}\NormalTok{, }\AttributeTok{size =} \DecValTok{14}\NormalTok{),}
+  \AttributeTok{axis.text =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{colour =} \StringTok{"\#660e60"}\NormalTok{, }\AttributeTok{size =} \DecValTok{12}\NormalTok{),}
+  \AttributeTok{axis.ticks.length =} \FunctionTok{unit}\NormalTok{(.}\DecValTok{2}\NormalTok{, }\StringTok{"cm"}\NormalTok{),}
+  \AttributeTok{plot.title =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{face =} \StringTok{"bold"}\NormalTok{, }\AttributeTok{size =} \DecValTok{18}\NormalTok{,}
+                            \AttributeTok{colour =} \StringTok{"\#660e60"}\NormalTok{, }\AttributeTok{hjust =} \FloatTok{0.5}\NormalTok{),}
+  \AttributeTok{plot.subtitle =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{face =} \StringTok{"italic"}\NormalTok{, }\AttributeTok{size =} \DecValTok{14}\NormalTok{,}
+                               \AttributeTok{colour =} \StringTok{"\#660e60"}\NormalTok{, }\AttributeTok{hjust =} \FloatTok{0.5}\NormalTok{),}
+  \AttributeTok{strip.background =} \FunctionTok{element\_rect}\NormalTok{(}\AttributeTok{fill =} \StringTok{"\#893f71"}\NormalTok{),}
+  \AttributeTok{strip.text =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{face =} \StringTok{"bold"}\NormalTok{, }\AttributeTok{colour =} \StringTok{"\#ffffea"}\NormalTok{, }\AttributeTok{size =} \DecValTok{12}\NormalTok{),}
+  \AttributeTok{legend.position =} \StringTok{"top"}\NormalTok{,}
+  \AttributeTok{legend.background =} \FunctionTok{element\_rect}\NormalTok{(}\AttributeTok{fill =} \StringTok{"\#ffffea"}\NormalTok{, }\AttributeTok{colour =} \StringTok{"\#cfa093"}\NormalTok{,}
+                                   \AttributeTok{linewidth =} \DecValTok{2}\NormalTok{),}
+  \AttributeTok{legend.title =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{face =} \StringTok{"bold"}\NormalTok{, }\AttributeTok{colour =} \StringTok{"\#660e60"}\NormalTok{),}
+  \AttributeTok{legend.text =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{size =} \DecValTok{12}\NormalTok{, }\AttributeTok{colour =} \StringTok{"\#660e60"}\NormalTok{)}
+\NormalTok{)}
+
+\CommentTok{\# Facet Scatter \& Density plot with raw data and regression line}
+\FunctionTok{ggplot}\NormalTok{(athl\_data, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ Weight, }\AttributeTok{y =}\NormalTok{ Height, }\AttributeTok{color =}\NormalTok{ Sex)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_point}\NormalTok{(}\AttributeTok{data =} \FunctionTok{transform}\NormalTok{(athl\_data, }\AttributeTok{Year =} \ConstantTok{NULL}\NormalTok{),}
+             \AttributeTok{colour =} \StringTok{"grey85"}\NormalTok{, }\AttributeTok{shape =} \DecValTok{4}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{geom\_point}\NormalTok{(}\AttributeTok{alpha =} \FloatTok{0.25}\NormalTok{, }\AttributeTok{size =} \DecValTok{3}\NormalTok{, }\AttributeTok{shape =} \DecValTok{19}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{geom\_smooth}\NormalTok{(}\AttributeTok{formula =} \StringTok{"y \textasciitilde{} x"}\NormalTok{, }\AttributeTok{method =} \StringTok{"lm"}\NormalTok{, }\AttributeTok{se =} \ConstantTok{FALSE}\NormalTok{, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{color =}\NormalTok{ Sex)) }\SpecialCharTok{+}
+  \FunctionTok{stat\_density\_2d}\NormalTok{(}\AttributeTok{alpha =} \FloatTok{0.2}\NormalTok{, }\AttributeTok{geom =} \StringTok{"polygon"}\NormalTok{, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{fill =}\NormalTok{ Sex)) }\SpecialCharTok{+}
+  \FunctionTok{scale\_color\_manual}\NormalTok{(}\AttributeTok{name =} \StringTok{""}\NormalTok{,}
+                     \AttributeTok{values =} \FunctionTok{c}\NormalTok{(}\StringTok{"M"} \OtherTok{=} \StringTok{"\#434279"}\NormalTok{, }\StringTok{"F"} \OtherTok{=} \StringTok{"\#c45161"}\NormalTok{),}
+                     \AttributeTok{labels =} \FunctionTok{c}\NormalTok{(}\StringTok{"M"} \OtherTok{=} \StringTok{"Men (M)"}\NormalTok{, }\StringTok{"F"} \OtherTok{=} \StringTok{"Women (F)"}\NormalTok{)) }\SpecialCharTok{+}
+  \FunctionTok{scale\_fill\_manual}\NormalTok{(}\AttributeTok{name =} \StringTok{""}\NormalTok{,}
+                    \AttributeTok{values =} \FunctionTok{c}\NormalTok{(}\StringTok{"M"} \OtherTok{=} \StringTok{"\#5e62a9"}\NormalTok{, }\StringTok{"F"} \OtherTok{=} \StringTok{"\#e094a0"}\NormalTok{),}
+                    \AttributeTok{labels =} \FunctionTok{c}\NormalTok{(}\StringTok{"M"} \OtherTok{=} \StringTok{"Men (M)"}\NormalTok{, }\StringTok{"F"} \OtherTok{=} \StringTok{"Women (F)"}\NormalTok{)) }\SpecialCharTok{+}
+  \FunctionTok{facet\_grid}\NormalTok{(Sex }\SpecialCharTok{\textasciitilde{}}\NormalTok{ Year) }\SpecialCharTok{+}
+  \FunctionTok{scale\_y\_continuous}\NormalTok{(}\AttributeTok{breaks =} \FunctionTok{seq}\NormalTok{(}\DecValTok{140}\NormalTok{, }\DecValTok{220}\NormalTok{, }\AttributeTok{by =} \DecValTok{10}\NormalTok{),}
+                     \AttributeTok{labels =}\NormalTok{ scales}\SpecialCharTok{::}\NormalTok{comma) }\SpecialCharTok{+}
+  \FunctionTok{scale\_x\_continuous}\NormalTok{(}\AttributeTok{breaks =} \FunctionTok{seq}\NormalTok{(}\DecValTok{40}\NormalTok{, }\DecValTok{180}\NormalTok{, }\AttributeTok{by =} \DecValTok{20}\NormalTok{)) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}\AttributeTok{title =} \StringTok{"Evolution of Height and Weight in Olympic Athletics;}
+\StringTok{       Comparison between 1928 and 2016"}\NormalTok{,}
+       \AttributeTok{subtitle =} \StringTok{"Data Source: 120 Years of Olympic History (Kaggle)"}\NormalTok{,}
+       \AttributeTok{x =} \StringTok{"Weight (in KG)"}\NormalTok{, }\AttributeTok{y =} \StringTok{"Height (in CM)"}\NormalTok{, }\AttributeTok{colour =} \StringTok{"Sex"}
+\NormalTok{  ) }\SpecialCharTok{+}
+\NormalTok{  olympic\_theme}
+\end{Highlighting}
+\end{Shaded}
+
+\pandocbounded{\includegraphics[keepaspectratio]{analyses_files/figure-latex/unnamed-chunk-2-1.pdf}}
+
+\newpage
+
+\subsection{Description of
+visualization}\label{description-of-visualization}
+
+The plot shows the evolution of the height and weight of male and female
+Olympic Athletics sporters and compares them between 1928 and 2016. It
+is a 4-way facet grid each layered with two scatterplots, a regression
+line and a density plot. One scatter plot is for that years' data points
+(little bit see-through circles) and the other is for the full amount of
+data points of both years (light grey 'x's).
+
+The top half is dedicated to women athletes and the bottom half is for
+the male athletes. Since 1928 was the first year in which women could
+participate for athletics, the data size is quite small. However, you
+can clearly see that in 1928 they are all clustered around a short
+height and small weight while by 2016 the data cluster shifted to taller
+heights and bigger weights; thus indicating a strong positive
+relationship. The same goes for the male athletes, albeit less prevalent
+but still quite a noticeable difference.
+
+Overall, you can see that over the decades athletes have become bigger
+in both ways, which indicates changes in the sport itself, but also in
+the way of training and nutrition.
+
+Shortcomings might be that it solely focuses on 1928 and 2016 and
+doesn't really show the evolution over all the years inbetween. Lastly,
+I'm just focusing on athletics and leaving out all the other sports.
+These require completely different body types and it would be
+interesting to see their history.
+
+\emph{243 words}
+
+\subsection{References}\label{references}
+
+\begin{itemize}
+\item
+  \href{https://stackoverflow.com/questions/48587115/turn-off-verbose-messages-when-loading-tidyverse-using-library-function}{Suppress
+  Tidyverse Library Messages}
+\item
+  \href{https://colorkit.co/palette/660e60-893f71-ac6f82-cfa093-f3d0a4/}{Theme
+  Colour Palette}
+\item
+  \href{https://colorkit.co/palette/c45161-e094a0-f2b6c0-f2dde1-cbc7d8-8db7d2-5e62a9-434279/}{Men
+  \& Women Colour Palette (only outer colours)}
+\item
+  \href{https://r-graph-gallery.com/2d-density-plot-with-ggplot2.html}{Scatter
+  \& Density plot Examples}
+\end{itemize}
+
+\end{document}

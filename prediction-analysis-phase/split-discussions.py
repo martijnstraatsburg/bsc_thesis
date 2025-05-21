@@ -26,8 +26,8 @@ def split_json_file(input_file, output_dir, num_parts):
 
 
 if __name__ == "__main__":
-    input_file = "1000-unseen-discussions.json"
+    input_file = "prediction-analysis-phase/1000-unseen-discussions.json"
     output_dir = "split_parts"
-    num_parts = 2
+    num_parts = 4
     # Split in two parts because it failed trying it fully in one on Habrok
     split_json_file(input_file, output_dir, num_parts)

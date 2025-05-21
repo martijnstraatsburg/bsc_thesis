@@ -1,0 +1,100 @@
+---
+title: "Assignment 4 - Data Visualization"
+author: "Martijn Straatsburg - S3726134"
+date: "`r format(Sys.time(), '%b %d, %Y')`"
+output:
+  html_document:
+    df_print: paged
+---
+
+## Visualization 
+
+### Packages & Data
+This is a historical dataset on the modern Olympic Games, including all the Games from Athens 1896 to Rio 2016. The data was retrieved from [here](https://www.kaggle.com/heesoo37/120-years-of-olympic-history-athletes-and-results). 
+```{r}
+library(ggplot2)
+# To suppress the conflicts of the packages with base R functions
+suppressPackageStartupMessages(library(tidyverse))
+suppressPackageStartupMessages(library(dplyr))
+data  <- read.csv("https://stulp.gmw.rug.nl/dataviz/athlete_events.csv", 
+                 header = TRUE)
+```
+
+### Code to create visualization
+```{r, fig.width=10, fig.height=10}
+# Load Athletics data from 1928 & 2016 and filter out NA's
+athl_data <- data %>%
+  filter(Sport == "Athletics",
+         Year %in% c(1928, 2016)) %>%
+  filter(!is.na(Height), !is.na(Weight))
+
+# Create Olympic theme
+olympic_theme <- theme(
+  panel.background = element_rect(fill = "#ffffea"),
+  panel.border = element_rect(linewidth = 4, colour = "#cfa093", fill = NA),
+  plot.background = element_rect(fill = "#ac6f82"),
+  panel.grid.major = element_line(colour = "#660e60"),
+  panel.grid.minor = element_line(colour = "#660e60"),
+  axis.title = element_text(face = "bold", colour = "#660e60", size = 14),
+  axis.text = element_text(colour = "#660e60", size = 12),
+  axis.ticks.length = unit(.2, "cm"),
+  plot.title = element_text(face = "bold", size = 18,
+                            colour = "#660e60", hjust = 0.5),
+  plot.subtitle = element_text(face = "italic", size = 14,
+                               colour = "#660e60", hjust = 0.5),
+  strip.background = element_rect(fill = "#893f71"),
+  strip.text = element_text(face = "bold", colour = "#ffffea", size = 12),
+  legend.position = "top",
+  legend.background = element_rect(fill = "#ffffea", colour = "#cfa093",
+                                   linewidth = 2),
+  legend.title = element_text(face = "bold", colour = "#660e60"),
+  legend.text = element_text(size = 12, colour = "#660e60")
+)
+
+# Facet Scatter & Density plot with raw data and regression line
+ggplot(athl_data, aes(x = Weight, y = Height, color = Sex)) +
+  geom_point(data = transform(athl_data, Year = NULL),
+             colour = "grey85", shape = 4) +
+  geom_point(alpha = 0.25, size = 3, shape = 19) +
+  geom_smooth(formula = "y ~ x", method = "lm", se = FALSE, aes(color = Sex)) +
+  stat_density_2d(alpha = 0.2, geom = "polygon", aes(fill = Sex)) +
+  scale_color_manual(name = "",
+                     values = c("M" = "#434279", "F" = "#c45161"),
+                     labels = c("M" = "Men (M)", "F" = "Women (F)")) +
+  scale_fill_manual(name = "",
+                    values = c("M" = "#5e62a9", "F" = "#e094a0"),
+                    labels = c("M" = "Men (M)", "F" = "Women (F)")) +
+  facet_grid(Sex ~ Year) +
+  scale_y_continuous(breaks = seq(140, 220, by = 10),
+                     labels = scales::comma) +
+  scale_x_continuous(breaks = seq(40, 180, by = 20)) +
+  labs(title = "Evolution of Height and Weight in Olympic Athletics;
+       Comparison between 1928 and 2016",
+       subtitle = "Data Source: 120 Years of Olympic History (Kaggle)",
+       x = "Weight (in KG)", y = "Height (in CM)", colour = "Sex"
+  ) +
+  olympic_theme
+```
+
+\newpage
+
+## Description of visualization
+The plot shows the evolution of the height and weight of male and female Olympic Athletics sporters and compares them between 1928 and 2016. It is a 4-way facet grid each layered with two scatterplots, a regression line and a density plot. One scatter plot is for that years’ data points (little bit see-through circles) and the other is for the full amount of data points of both years (light grey ‘x’s).
+
+The top half is dedicated to women athletes and the bottom half is for the male athletes. Since 1928 was the first year in which women could participate for athletics, the data size is quite small. However, you can clearly see that in 1928 they are all clustered around a short height and small weight while by 2016 the data cluster shifted to taller heights and bigger weights; thus indicating a strong positive relationship. The same goes for the male athletes, albeit less prevalent but still quite a noticeable difference.
+
+Overall, you can see that over the decades athletes have become bigger in both ways, which indicates changes in the sport itself, but also in the way of training and nutrition.
+
+Shortcomings might be that it solely focuses on 1928 and 2016 and doesn’t really show the evolution over all the years inbetween. Lastly, I’m just focusing on athletics and leaving out all the other sports. These require completely different body types and it would be interesting to see their history.
+
+*243 words*
+
+## References
+
+* [Suppress Tidyverse Library Messages](https://stackoverflow.com/questions/48587115/turn-off-verbose-messages-when-loading-tidyverse-using-library-function)
+
+* [Theme Colour Palette](https://colorkit.co/palette/660e60-893f71-ac6f82-cfa093-f3d0a4/)
+
+* [Men & Women Colour Palette (only outer colours)](https://colorkit.co/palette/c45161-e094a0-f2b6c0-f2dde1-cbc7d8-8db7d2-5e62a9-434279/)
+
+* [Scatter & Density plot Examples](https://r-graph-gallery.com/2d-density-plot-with-ggplot2.html)
