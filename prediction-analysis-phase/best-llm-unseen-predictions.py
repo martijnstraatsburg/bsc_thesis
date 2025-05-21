@@ -339,7 +339,6 @@ if __name__ == "__main__":
     #mod_gold_standard_file = "split_parts/part_2.json" # entry 23664 too long; 5026 tokens > 4096 tokens
     #mod_gold_standard_file = "split_parts/part_3.json"
     mod_gold_standard_file = "split_parts/part_4.json"
-    # CHANGE OUTPUT FILE NAME !!!
     output_directory = "split_predictions" # Change filename after or it overwrites
     process_gold_standard(client, mod_gold_standard_file, model_name=MODEL, output_dir=output_directory)
     analyser = PostAnalyser(client=client, model_name=MODEL, shot="multi", temperature=0.6,
