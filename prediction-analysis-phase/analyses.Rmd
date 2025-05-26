@@ -2,84 +2,303 @@
 title: "Analyses"
 author: "Martijn Straatsburg"
 date: "Generation date: `r format(Sys.time(), '%b %d, %Y - %H:%M:%S')`"
-output: pdf_document
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+## Packages
+
 ```{r}
 library(ggplot2)
 library(jsonlite)
-library(vcd)
-# To suppress the conflicts of the packages with base R functions
+suppressPackageStartupMessages(library(vcd))
+suppressPackageStartupMessages(library(vcdExtra))
+library(DescTools)
+suppressPackageStartupMessages(library(car))
+suppressPackageStartupMessages(library(pROC))
+suppressPackageStartupMessages(library(ResourceSelection))
 suppressPackageStartupMessages(library(tidyverse))
 suppressPackageStartupMessages(library(dplyr))
+suppressPackageStartupMessages(library(reshape2))
+library(effects)
+```
+
+## Data
+```{r}
 df <- fromJSON("predicted-dataset-updated.json")
 df <- df %>%
   mutate(
     persuasion_success = factor(persuasion_success,
-                                levels = c(0,1),
+                                levels = c(0 , 1),
                                 labels = c("No Delta", "Yes Delta")),
     story_class = factor(story_class),
     suspense = as.integer(suspense),
     curiosity = as.integer(curiosity),
-    surprise = as.integer(surprise)
+    surprise = as.integer(surprise),
+    level_suspense = factor(level_suspense,
+                            levels = c("low", "medium", "high")),
+    level_curiosity = factor(level_curiosity,
+                             levels = c("low", "medium", "high")),
+    level_surprise = factor(level_surprise,
+                            levels = c("low", "medium", "high")),
+    binary_suspense = factor(binary_suspense,
+                             levels = c("under", "over")),
+    binary_curiosity = factor(binary_curiosity,
+                              levels = c("under", "over")),
+    binary_surprise = factor(binary_surprise,
+                             levels = c("under", "over"))
   )
+#str(df)
 ```
 
-### Chi-Square Test & Cramer's V
+## Story
 ```{r, fig.width=10, fig.height=10}
-table <- table(df$story_class, df$persuasion_success)
-(chisquare <- chisq.test(table))
-(cramerv <- assocstats(table)$cramer)
+# contingency table
+(table_story <- table(df$story_class, df$persuasion_success))
+
+# expected counts
+chisq.test(table_story)$expected
+
+# counts and row %'s table
+prop.table(table_story, 1) * 100
+
+# chi-square test
+(chisq_story <- chisq.test(table_story))
+
+# cramer's v (effect size) with CIs
+cramerv_story <- assocstats(table_story)
+cramerv_story$cramer
+
+(cramerv_ci_story <- CramerV(table_story, conf.level = 0.95))
+
+# mosaic plot
+mosaicplot(table_story, shade = T, main = "Mosaic: Story vs. Persuasion Success")
+
+# stacked bar chart
+ggplot(df, aes(x=story_class, fill=persuasion_success)) +
+  geom_bar(position='fill') +
+  scale_y_continuous(labels = scales::percent_format()) +
+  labs(y = 'Percent', x = 'Story Class', fill = 'Delta') +
+  theme_minimal()
 ```
 
-### Suspense: Mann-Whitney U Test & Z-Test (effect size)
+## Suspense (low/medium/high)
 ```{r, fig.width=10, fig.height=10}
-# suspense
-(u_susp <- wilcox.test(suspense ~ persuasion_success, data = df, exact = FALSE))
+(table_lvl_suspense <- table(df$level_suspense, df$persuasion_success))
 
-# z-value and effect size r = Z / sqrt(N)
-Z_susp <- qnorm(u_susp$p.value / 2, lower.tail = FALSE)
-N <- nrow(df)
-(r_susp <- Z_susp / sqrt(N))
+chisq.test(table_lvl_suspense)$expected
+
+(chisq_lvl_suspense <- chisq.test(table_lvl_suspense))
+
+cramerv_lvl_suspense <- assocstats(table_lvl_suspense)
+
+cramerv_lvl_suspense$cramer
+
+(gkgamma_lvl_suspense <- GKgamma(table_lvl_suspense))
+
+(catest_lvl_suspense <- CochranArmitageTest(x = table(df$level_suspense, df$persuasion_success)))
+
+df %>%
+  group_by(level_suspense, persuasion_success) %>%
+  summarise(n = n()) %>%
+  group_by(level_suspense) %>%
+  mutate(pct = n / sum(n) * 100) %>%
+  filter(persuasion_success == 'Yes Delta') %>%
+  ggplot(aes(x = level_suspense, y = pct, group=1)) +
+  geom_line() + geom_point() +
+  labs(title='Yes-Delta % by Suspense Level', y='Percent Yes', x='Suspense Level') +
+  theme_minimal()
+
+resid_lvl_suspense <- chisq.test(table_lvl_suspense)$stdres
+res_df <- melt(resid_lvl_suspense)
+colnames(res_df) <- c('Level','Delta','StdResid')
+
+ggplot(res_df, aes(x=Delta, y=Level, fill=StdResid)) +
+  geom_tile() +
+  geom_text(aes(label = round(StdResid, 2))) +
+  scale_fill_gradient2(low='blue', mid='white', high='red') +
+  labs(title='Std Residuals: Suspense vs Delta') +
+  theme_minimal()
 ```
 
-### Curiosity: Mann-Whitney U Test & Z-Test (effect size)
+## Curiosity (low/medium/high)
 ```{r, fig.width=10, fig.height=10}
-# curiosity
-(u_curi <- wilcox.test(curiosity ~ persuasion_success, data = df, exact = FALSE))
+(table_lvl_curiosity <- table(df$level_curiosity, df$persuasion_success))
 
-# z-value and effect size r = Z / sqrt(N)
-Z_curi <- qnorm(u_curi$p.value / 2, lower.tail = FALSE)
-N <- nrow(df)
-(r_curi <- Z_curi / sqrt(N))
+chisq.test(table_lvl_curiosity)$expected
+
+(chisq_lvl_curiosity <- chisq.test(table_lvl_curiosity))
+
+cramerv_lvl_curiosity <- assocstats(table_lvl_curiosity)
+
+cramerv_lvl_curiosity$cramer
+
+(gkgamma_lvl_curiosity <- GKgamma(table_lvl_curiosity))
+
+(catest_lvl_curiosity <- CochranArmitageTest(x = table(df$level_curiosity, df$persuasion_success)))
+
+df %>%
+  group_by(level_curiosity, persuasion_success) %>%
+  summarise(n = n()) %>%
+  group_by(level_curiosity) %>%
+  mutate(pct = n / sum(n) * 100) %>%
+  filter(persuasion_success == 'Yes Delta') %>%
+  ggplot(aes(x = level_curiosity, y = pct, group=1)) +
+  geom_line() + geom_point() +
+  labs(title='Yes-Delta % by curiosity Level', y='Percent Yes', x='curiosity Level') +
+  theme_minimal()
+
+resid_lvl_curiosity <- chisq.test(table_lvl_curiosity)$stdres
+res_df <- melt(resid_lvl_curiosity)
+colnames(res_df) <- c('Level','Delta','StdResid')
+
+ggplot(res_df, aes(x=Delta, y=Level, fill=StdResid)) +
+  geom_tile() +
+  geom_text(aes(label = round(StdResid, 2))) +
+  scale_fill_gradient2(low='blue', mid='white', high='red') +
+  labs(title='Std Residuals: curiosity vs Delta') +
+  theme_minimal()
 ```
 
-### Surprise: Mann-Whitney U Test & Z-Test (effect size)
+## Surprise (low/medium/high)
 ```{r, fig.width=10, fig.height=10}
-# surprise
-(u_surp <- wilcox.test(surprise ~ persuasion_success, data = df, exact = FALSE))
+(table_lvl_surprise <- table(df$level_surprise, df$persuasion_success))
 
-# z-value and effect size r = Z / sqrt(N)
-Z_surp <- qnorm(u_surp$p.value / 2, lower.tail = FALSE)
-N <- nrow(df)
-(r_surp <- Z_surp / sqrt(N))
+chisq.test(table_lvl_surprise)$expected
+
+(chisq_lvl_surprise <- chisq.test(table_lvl_surprise))
+
+cramerv_lvl_surprise <- assocstats(table_lvl_surprise)
+
+cramerv_lvl_surprise$cramer
+
+(gkgamma_lvl_surprise <- GKgamma(table_lvl_surprise))
+
+(catest_lvl_surprise <- CochranArmitageTest(x = table(df$level_surprise, df$persuasion_success)))
+
+df %>%
+  group_by(level_surprise, persuasion_success) %>%
+  summarise(n = n()) %>%
+  group_by(level_surprise) %>%
+  mutate(pct = n / sum(n) * 100) %>%
+  filter(persuasion_success == 'Yes Delta') %>%
+  ggplot(aes(x = level_surprise, y = pct, group=1)) +
+  geom_line() + geom_point() +
+  labs(title='Yes-Delta % by surprise Level', y='Percent Yes', x='surprise Level') +
+  theme_minimal()
+
+resid_lvl_surprise <- chisq.test(table_lvl_surprise)$stdres
+res_df <- melt(resid_lvl_surprise)
+colnames(res_df) <- c('Level','Delta','StdResid')
+
+ggplot(res_df, aes(x=Delta, y=Level, fill=StdResid)) +
+  geom_tile() +
+  geom_text(aes(label = round(StdResid, 2))) +
+  scale_fill_gradient2(low='blue', mid='white', high='red') +
+  labs(title='Std Residuals: surprise vs Delta') +
+  theme_minimal()
 ```
 
-### Logistic Regression with Interaction Terms
+## Suspense, Curiosity, Surprise (1-5)
 ```{r, fig.width=10, fig.height=10}
-full_model <- glm(
-  persuasion_success ~ story_class
-    + suspense + curiosity + surprise
-    + story_class:suspense
-    + story_class:curiosity
-    + story_class:surprise,
-  data = df,
-  family = binomial
-)
+df_long <- df %>% select(persuasion_success, suspense, curiosity, surprise) %>%
+  pivot_longer(-persuasion_success, names_to='metric', values_to='rating')
 
+ggplot(df_long, aes(x=rating, color=persuasion_success)) +
+  geom_density() + facet_wrap(~metric, scales='free') +
+  labs(title='Density by Delta Success') + theme_minimal()
+
+ggplot(df_long, aes(x=persuasion_success, y=rating)) +
+  geom_boxplot() + facet_wrap(~metric) +
+  labs(title='Boxplots by Delta Success') + theme_minimal()
+
+metrics <- c('suspense','curiosity','surprise')
+res_mwu <- map_df(metrics, function(m) {
+  formula <- as.formula(paste(m, '~ persuasion_success'))
+  test    <- wilcox.test(formula, data=df, exact=FALSE)
+  medians <- df %>%
+    group_by(persuasion_success) %>%
+    summarize(med=median(.data[[m]]),
+              IQR=IQR(.data[[m]]))
+  data.frame(
+    metric = m,
+    U      = test$statistic,
+    p      = test$p.value,
+    median_No  = medians$med[1],
+    IQR_No     = medians$IQR[1],
+    median_Yes = medians$med[2],
+    IQR_Yes    = medians$IQR[2]
+  )
+})
+res_mwu
+```
+
+## Logistic Regression with Interaction Terms
+```{r, fig.width=10, fig.height=10}
+full_model <- glm(persuasion_success ~ story_class + level_suspense + level_curiosity + level_surprise + story_class:level_suspense + story_class:level_curiosity + story_class:level_surprise, data = df, family = binomial)
 summary(full_model)
+ORs <- exp(coef(full_model))
+CIs <- exp(confint(full_model))
+odds_table <- cbind(OR = ORs, CI_low = CIs[,1], CI_high = CIs[,2])
+knitr::kable(odds_table, digits=3)
+(tbl_vif <- vif(full_model))
+(hl <- hoslem.test(as.numeric(df$persuasion_success) - 1, fitted(full_model), g=10))
+roc_obj <- roc(df$persuasion_success, predict(full_model, type='response'))
+plot(roc_obj, main = paste0('ROC Curve (AUC = ', round(auc(roc_obj),3), ')'))
+```
+
+## Old stuff
+```{r, fig.width=10, fig.height=10}
+(table_story_class <- table(df$story_class, df$persuasion_success))
+chisq.test(table_story_class)$expected
+chisq.test(table_story_class)
+assocstats(table_story_class)$cramer
+#mosaicplot(table_story_class, shade=TRUE, main="Story vs. Persuasion Success")
+# stacked bar chart
+# table with counts and row percentage
+# explain each piece of code and result
+# independence of each post (no repeated measures)
+
+(table_level_suspense <- table(df$level_suspense, df$persuasion_success))
+chisq.test(table_level_suspense)$expected
+chisq.test(table_level_suspense)
+assocstats(table_level_suspense)$cramer
+GKgamma(table_level_suspense)
+# ordinal trend test (Cochran-Armitage)
+# profile plot
+# stacked bar chart
+# heatmap
+
+(table_level_curiosity <- table(df$level_curiosity, df$persuasion_success))
+chisq.test(table_level_curiosity)$expected
+chisq.test(table_level_curiosity)
+assocstats(table_level_curiosity)$cramer
+GKgamma(table_level_curiosity)
+# ordinal trend test (Cochran-Armitage)
+# profile plot
+# stacked bar chart
+# heatmap
+
+(table_level_surprise <- table(df$level_surprise, df$persuasion_success))
+chisq.test(table_level_surprise)$expected
+chisq.test(table_level_surprise)
+assocstats(table_level_surprise)$cramer
+GKgamma(table_level_surprise)
+# ordinal trend test (Cochran-Armitage)
+# profile plot
+# stacked bar chart
+# heatmap
+
+full_model <- glm(
+  persuasion_success ~ story_class + level_suspense + level_curiosity + level_surprise + story_class:level_suspense + story_class:level_curiosity + story_class:level_surprise, data = df, family = binomial)
+summary(full_model)
+#odds_ratios <- exp(coef(full_model))
+#conf_ints <- exp(confint(full_model))
+#cbind(odds_ratio = odds_ratios, low_conf_int = conf_ints[,1], upper_conf_int = conf_ints[,2])
 ```
