@@ -1,0 +1,85 @@
+---
+title: "Analyses"
+author: "Martijn Straatsburg"
+date: "Generation date: `r format(Sys.time(), '%b %d, %Y - %H:%M:%S')`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(ggplot2)
+library(jsonlite)
+library(vcd)
+# To suppress the conflicts of the packages with base R functions
+suppressPackageStartupMessages(library(tidyverse))
+suppressPackageStartupMessages(library(dplyr))
+df <- fromJSON("predicted-dataset-updated.json")
+df <- df %>%
+  mutate(
+    persuasion_success = factor(persuasion_success,
+                                levels = c(0,1),
+                                labels = c("No Delta", "Yes Delta")),
+    story_class = factor(story_class),
+    suspense = as.integer(suspense),
+    curiosity = as.integer(curiosity),
+    surprise = as.integer(surprise)
+  )
+```
+
+### Chi-Square Test & Cramer's V
+```{r, fig.width=10, fig.height=10}
+table <- table(df$story_class, df$persuasion_success)
+(chisquare <- chisq.test(table))
+(cramerv <- assocstats(table)$cramer)
+```
+
+### Suspense: Mann-Whitney U Test & Z-Test (effect size)
+```{r, fig.width=10, fig.height=10}
+# suspense
+(u_susp <- wilcox.test(suspense ~ persuasion_success, data = df, exact = FALSE))
+
+# z-value and effect size r = Z / sqrt(N)
+Z_susp <- qnorm(u_susp$p.value / 2, lower.tail = FALSE)
+N <- nrow(df)
+(r_susp <- Z_susp / sqrt(N))
+```
+
+### Curiosity: Mann-Whitney U Test & Z-Test (effect size)
+```{r, fig.width=10, fig.height=10}
+# curiosity
+(u_curi <- wilcox.test(curiosity ~ persuasion_success, data = df, exact = FALSE))
+
+# z-value and effect size r = Z / sqrt(N)
+Z_curi <- qnorm(u_curi$p.value / 2, lower.tail = FALSE)
+N <- nrow(df)
+(r_curi <- Z_curi / sqrt(N))
+```
+
+### Surprise: Mann-Whitney U Test & Z-Test (effect size)
+```{r, fig.width=10, fig.height=10}
+# surprise
+(u_surp <- wilcox.test(surprise ~ persuasion_success, data = df, exact = FALSE))
+
+# z-value and effect size r = Z / sqrt(N)
+Z_surp <- qnorm(u_surp$p.value / 2, lower.tail = FALSE)
+N <- nrow(df)
+(r_surp <- Z_surp / sqrt(N))
+```
+
+### Logistic Regression with Interaction Terms
+```{r, fig.width=10, fig.height=10}
+full_model <- glm(
+  persuasion_success ~ story_class
+    + suspense + curiosity + surprise
+    + story_class:suspense
+    + story_class:curiosity
+    + story_class:surprise,
+  data = df,
+  family = binomial
+)
+
+summary(full_model)
+```
