@@ -3,9 +3,9 @@ title: "Analyses"
 author: "Martijn Straatsburg"
 date: "Generation date: `r format(Sys.time(), '%b %d, %Y - %H:%M:%S')`"
 output:
-  pdf_document: default
   html_document:
     df_print: paged
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -15,18 +15,21 @@ knitr::opts_chunk$set(echo = TRUE)
 ## Packages
 
 ```{r}
-library(ggplot2)
-library(jsonlite)
+suppressPackageStartupMessages(library(ggplot2))
+suppressPackageStartupMessages(library(jsonlite))
 suppressPackageStartupMessages(library(vcd))
 suppressPackageStartupMessages(library(vcdExtra))
-library(DescTools)
+suppressPackageStartupMessages(library(DescTools))
 suppressPackageStartupMessages(library(car))
 suppressPackageStartupMessages(library(pROC))
 suppressPackageStartupMessages(library(ResourceSelection))
 suppressPackageStartupMessages(library(tidyverse))
 suppressPackageStartupMessages(library(dplyr))
 suppressPackageStartupMessages(library(reshape2))
-library(effects)
+suppressPackageStartupMessages(library(effects))
+suppressPackageStartupMessages(library(corrplot))
+suppressPackageStartupMessages(library(logistf))
+suppressPackageStartupMessages(library(RVAideMemoire))
 ```
 
 ## Data
@@ -78,14 +81,10 @@ cramerv_story$cramer
 (cramerv_ci_story <- CramerV(table_story, conf.level = 0.95))
 
 # mosaic plot
-mosaicplot(table_story, shade = T, main = "Mosaic: Story vs. Persuasion Success")
+#mosaicplot(table_story, shade = T, main = "Mosaic: Story vs. Persuasion Success")
 
 # stacked bar chart
-ggplot(df, aes(x=story_class, fill=persuasion_success)) +
-  geom_bar(position='fill') +
-  scale_y_continuous(labels = scales::percent_format()) +
-  labs(y = 'Percent', x = 'Story Class', fill = 'Delta') +
-  theme_minimal()
+#ggplot(df, aes(x=story_class, fill=persuasion_success)) + geom_bar(position='fill') + scale_y_continuous(labels = scales::percent_format()) + labs(y = 'Percent', x = 'Story Class', fill = 'Delta') + theme_minimal()
 ```
 
 ## Suspense (low/medium/high)
@@ -104,27 +103,13 @@ cramerv_lvl_suspense$cramer
 
 (catest_lvl_suspense <- CochranArmitageTest(x = table(df$level_suspense, df$persuasion_success)))
 
-df %>%
-  group_by(level_suspense, persuasion_success) %>%
-  summarise(n = n()) %>%
-  group_by(level_suspense) %>%
-  mutate(pct = n / sum(n) * 100) %>%
-  filter(persuasion_success == 'Yes Delta') %>%
-  ggplot(aes(x = level_suspense, y = pct, group=1)) +
-  geom_line() + geom_point() +
-  labs(title='Yes-Delta % by Suspense Level', y='Percent Yes', x='Suspense Level') +
-  theme_minimal()
+#df %>% group_by(level_suspense, persuasion_success) %>% summarise(n = n()) %>% group_by(level_suspense) %>% mutate(pct = n / sum(n) * 100) %>% filter(persuasion_success == 'Yes Delta') %>% ggplot(aes(x = level_suspense, y = pct, group=1)) + geom_line() + geom_point() + labs(title='Yes-Delta % by Suspense Level', y='Percent Yes', x='Suspense Level') + theme_minimal()
 
-resid_lvl_suspense <- chisq.test(table_lvl_suspense)$stdres
-res_df <- melt(resid_lvl_suspense)
-colnames(res_df) <- c('Level','Delta','StdResid')
+#resid_lvl_suspense <- chisq.test(table_lvl_suspense)$stdres
+#res_df <- melt(resid_lvl_suspense)
+#colnames(res_df) <- c('Level','Delta','StdResid')
 
-ggplot(res_df, aes(x=Delta, y=Level, fill=StdResid)) +
-  geom_tile() +
-  geom_text(aes(label = round(StdResid, 2))) +
-  scale_fill_gradient2(low='blue', mid='white', high='red') +
-  labs(title='Std Residuals: Suspense vs Delta') +
-  theme_minimal()
+#ggplot(res_df, aes(x=Delta, y=Level, fill=StdResid)) + geom_tile() + geom_text(aes(label = round(StdResid, 2))) + scale_fill_gradient2(low='blue', mid='white', high='red') + labs(title='Std Residuals: Suspense vs Delta') + theme_minimal()
 ```
 
 ## Curiosity (low/medium/high)
@@ -143,27 +128,13 @@ cramerv_lvl_curiosity$cramer
 
 (catest_lvl_curiosity <- CochranArmitageTest(x = table(df$level_curiosity, df$persuasion_success)))
 
-df %>%
-  group_by(level_curiosity, persuasion_success) %>%
-  summarise(n = n()) %>%
-  group_by(level_curiosity) %>%
-  mutate(pct = n / sum(n) * 100) %>%
-  filter(persuasion_success == 'Yes Delta') %>%
-  ggplot(aes(x = level_curiosity, y = pct, group=1)) +
-  geom_line() + geom_point() +
-  labs(title='Yes-Delta % by curiosity Level', y='Percent Yes', x='curiosity Level') +
-  theme_minimal()
+#df %>% group_by(level_curiosity, persuasion_success) %>% summarise(n = n()) %>% group_by(level_curiosity) %>% mutate(pct = n / sum(n) * 100) %>% filter(persuasion_success == 'Yes Delta') %>% ggplot(aes(x = level_curiosity, y = pct, group=1)) + geom_line() + geom_point() + labs(title='Yes-Delta % by curiosity Level', y='Percent Yes', x='curiosity Level') + theme_minimal()
 
-resid_lvl_curiosity <- chisq.test(table_lvl_curiosity)$stdres
-res_df <- melt(resid_lvl_curiosity)
-colnames(res_df) <- c('Level','Delta','StdResid')
+#resid_lvl_curiosity <- chisq.test(table_lvl_curiosity)$stdres
+#res_df <- melt(resid_lvl_curiosity)
+#colnames(res_df) <- c('Level','Delta','StdResid')
 
-ggplot(res_df, aes(x=Delta, y=Level, fill=StdResid)) +
-  geom_tile() +
-  geom_text(aes(label = round(StdResid, 2))) +
-  scale_fill_gradient2(low='blue', mid='white', high='red') +
-  labs(title='Std Residuals: curiosity vs Delta') +
-  theme_minimal()
+#ggplot(res_df, aes(x=Delta, y=Level, fill=StdResid)) + geom_tile() + geom_text(aes(label = round(StdResid, 2))) + scale_fill_gradient2(low='blue', mid='white', high='red') + labs(title='Std Residuals: curiosity vs Delta') + theme_minimal()
 ```
 
 ## Surprise (low/medium/high)
@@ -182,27 +153,13 @@ cramerv_lvl_surprise$cramer
 
 (catest_lvl_surprise <- CochranArmitageTest(x = table(df$level_surprise, df$persuasion_success)))
 
-df %>%
-  group_by(level_surprise, persuasion_success) %>%
-  summarise(n = n()) %>%
-  group_by(level_surprise) %>%
-  mutate(pct = n / sum(n) * 100) %>%
-  filter(persuasion_success == 'Yes Delta') %>%
-  ggplot(aes(x = level_surprise, y = pct, group=1)) +
-  geom_line() + geom_point() +
-  labs(title='Yes-Delta % by surprise Level', y='Percent Yes', x='surprise Level') +
-  theme_minimal()
+#df %>% group_by(level_surprise, persuasion_success) %>% summarise(n = n()) %>% group_by(level_surprise) %>% mutate(pct = n / sum(n) * 100) %>% filter(persuasion_success == 'Yes Delta') %>% ggplot(aes(x = level_surprise, y = pct, group=1)) + geom_line() + geom_point() + labs(title='Yes-Delta % by surprise Level', y='Percent Yes', x='surprise Level') + theme_minimal()
 
-resid_lvl_surprise <- chisq.test(table_lvl_surprise)$stdres
-res_df <- melt(resid_lvl_surprise)
-colnames(res_df) <- c('Level','Delta','StdResid')
+#resid_lvl_surprise <- chisq.test(table_lvl_surprise)$stdres
+#res_df <- melt(resid_lvl_surprise)
+#colnames(res_df) <- c('Level','Delta','StdResid')
 
-ggplot(res_df, aes(x=Delta, y=Level, fill=StdResid)) +
-  geom_tile() +
-  geom_text(aes(label = round(StdResid, 2))) +
-  scale_fill_gradient2(low='blue', mid='white', high='red') +
-  labs(title='Std Residuals: surprise vs Delta') +
-  theme_minimal()
+#ggplot(res_df, aes(x=Delta, y=Level, fill=StdResid)) + geom_tile() + geom_text(aes(label = round(StdResid, 2))) + scale_fill_gradient2(low='blue', mid='white', high='red') + labs(title='Std Residuals: surprise vs Delta') + theme_minimal()
 ```
 
 ## Suspense, Curiosity, Surprise (1-5)
@@ -210,13 +167,9 @@ ggplot(res_df, aes(x=Delta, y=Level, fill=StdResid)) +
 df_long <- df %>% select(persuasion_success, suspense, curiosity, surprise) %>%
   pivot_longer(-persuasion_success, names_to='metric', values_to='rating')
 
-ggplot(df_long, aes(x=rating, color=persuasion_success)) +
-  geom_density() + facet_wrap(~metric, scales='free') +
-  labs(title='Density by Delta Success') + theme_minimal()
+#ggplot(df_long, aes(x=rating, color=persuasion_success)) + geom_density() + facet_wrap(~metric, scales='free') + labs(title='Density by Delta Success') + theme_minimal()
 
-ggplot(df_long, aes(x=persuasion_success, y=rating)) +
-  geom_boxplot() + facet_wrap(~metric) +
-  labs(title='Boxplots by Delta Success') + theme_minimal()
+#ggplot(df_long, aes(x=persuasion_success, y=rating)) + geom_boxplot() + facet_wrap(~metric) + labs(title='Boxplots by Delta Success') + theme_minimal()
 
 metrics <- c('suspense','curiosity','surprise')
 res_mwu <- map_df(metrics, function(m) {
@@ -255,50 +208,267 @@ plot(roc_obj, main = paste0('ROC Curve (AUC = ', round(auc(roc_obj),3), ')'))
 
 ## Old stuff
 ```{r, fig.width=10, fig.height=10}
-(table_story_class <- table(df$story_class, df$persuasion_success))
-chisq.test(table_story_class)$expected
-chisq.test(table_story_class)
-assocstats(table_story_class)$cramer
+#(table_story_class <- table(df$story_class, df$persuasion_success))
+#chisq.test(table_story_class)$expected
+#chisq.test(table_story_class)
+#assocstats(table_story_class)$cramer
 #mosaicplot(table_story_class, shade=TRUE, main="Story vs. Persuasion Success")
 # stacked bar chart
 # table with counts and row percentage
 # explain each piece of code and result
 # independence of each post (no repeated measures)
 
-(table_level_suspense <- table(df$level_suspense, df$persuasion_success))
-chisq.test(table_level_suspense)$expected
-chisq.test(table_level_suspense)
-assocstats(table_level_suspense)$cramer
-GKgamma(table_level_suspense)
+#(table_level_suspense <- table(df$level_suspense, df$persuasion_success))
+#chisq.test(table_level_suspense)$expected
+#chisq.test(table_level_suspense)
+#assocstats(table_level_suspense)$cramer
+#GKgamma(table_level_suspense)
 # ordinal trend test (Cochran-Armitage)
 # profile plot
 # stacked bar chart
 # heatmap
 
-(table_level_curiosity <- table(df$level_curiosity, df$persuasion_success))
-chisq.test(table_level_curiosity)$expected
-chisq.test(table_level_curiosity)
-assocstats(table_level_curiosity)$cramer
-GKgamma(table_level_curiosity)
+#(table_level_curiosity <- table(df$level_curiosity, df$persuasion_success))
+#chisq.test(table_level_curiosity)$expected
+#chisq.test(table_level_curiosity)
+#assocstats(table_level_curiosity)$cramer
+#GKgamma(table_level_curiosity)
 # ordinal trend test (Cochran-Armitage)
 # profile plot
 # stacked bar chart
 # heatmap
 
-(table_level_surprise <- table(df$level_surprise, df$persuasion_success))
-chisq.test(table_level_surprise)$expected
-chisq.test(table_level_surprise)
-assocstats(table_level_surprise)$cramer
-GKgamma(table_level_surprise)
+#(table_level_surprise <- table(df$level_surprise, df$persuasion_success))
+#chisq.test(table_level_surprise)$expected
+#chisq.test(table_level_surprise)
+#assocstats(table_level_surprise)$cramer
+#GKgamma(table_level_surprise)
 # ordinal trend test (Cochran-Armitage)
 # profile plot
 # stacked bar chart
 # heatmap
 
-full_model <- glm(
-  persuasion_success ~ story_class + level_suspense + level_curiosity + level_surprise + story_class:level_suspense + story_class:level_curiosity + story_class:level_surprise, data = df, family = binomial)
-summary(full_model)
+#full_model <- glm(persuasion_success ~ story_class + level_suspense + level_curiosity + level_surprise + story_class:level_suspense + story_class:level_curiosity + story_class:level_surprise, data = df, family = binomial)
+#summary(full_model)
 #odds_ratios <- exp(coef(full_model))
 #conf_ints <- exp(confint(full_model))
 #cbind(odds_ratio = odds_ratios, low_conf_int = conf_ints[,1], upper_conf_int = conf_ints[,2])
+```
+
+## Everything missing.
+```{r, fig.width=10, fig.height=10}
+# 1. CORRELATION ANALYSIS FOR CONTINUOUS VARIABLES
+
+# Spearman correlations between 1-5 scale variables
+cor_matrix <- cor(df[,c("suspense", "curiosity", "surprise")], 
+                  method = "spearman", use = "complete.obs")
+print("Spearman Correlations:")
+print(cor_matrix)
+
+# Test significance of correlations (suppress tie warnings - normal with ordinal data)
+cor_test_results <- suppressWarnings(cor.test(df$suspense, df$curiosity, method = "spearman"))
+cor_test_results2 <- suppressWarnings(cor.test(df$suspense, df$surprise, method = "spearman"))
+cor_test_results3 <- suppressWarnings(cor.test(df$curiosity, df$surprise, method = "spearman"))
+
+# Create correlation summary table
+correlation_summary <- data.frame(
+  Variable_Pair = c("Suspense-Curiosity", "Suspense-Surprise", "Curiosity-Surprise"),
+  Spearman_rho = c(cor_test_results$estimate, cor_test_results2$estimate, cor_test_results3$estimate),
+  p_value = c(cor_test_results$p.value, cor_test_results2$p.value, cor_test_results3$p.value),
+  Significance = c(
+    ifelse(cor_test_results$p.value < 0.001, "***",
+           ifelse(cor_test_results$p.value < 0.01, "**",
+                  ifelse(cor_test_results$p.value < 0.05, "*", "ns"))),
+    ifelse(cor_test_results2$p.value < 0.001, "***",
+           ifelse(cor_test_results2$p.value < 0.01, "**",
+                  ifelse(cor_test_results2$p.value < 0.05, "*", "ns"))),
+    ifelse(cor_test_results3$p.value < 0.001, "***",
+           ifelse(cor_test_results3$p.value < 0.01, "**",
+                  ifelse(cor_test_results3$p.value < 0.05, "*", "ns")))
+  )
+)
+
+print("Correlation Test Results:")
+print(correlation_summary)
+
+# 2. POST-HOC PAIRWISE COMPARISONS FOR CATEGORICAL VARIABLES
+
+# Function to perform pairwise chi-square tests
+perform_pairwise_chisq <- function(data, group_var, outcome_var) {
+  levels_list <- levels(data[[group_var]])
+  n_comparisons <- choose(length(levels_list), 2)
+  results <- data.frame()
+  
+  for(i in 1:(length(levels_list)-1)) {
+    for(j in (i+1):length(levels_list)) {
+      # Subset data for two levels
+      subset_data <- data[data[[group_var]] %in% c(levels_list[i], levels_list[j]), ]
+      subset_data[[group_var]] <- droplevels(subset_data[[group_var]])
+      
+      # Create contingency table
+      cont_table <- table(subset_data[[group_var]], subset_data[[outcome_var]])
+      
+      # Perform chi-square test
+      chisq_result <- chisq.test(cont_table)
+      
+      # Calculate percentages for each group
+      prop_table <- prop.table(cont_table, 1) * 100
+      yes_delta_pct1 <- prop_table[1, "Yes Delta"]
+      yes_delta_pct2 <- prop_table[2, "Yes Delta"]
+      
+      results <- rbind(results, data.frame(
+        Comparison = paste(levels_list[i], "vs", levels_list[j]),
+        Chi_Square = round(chisq_result$statistic, 3),
+        p_value = chisq_result$p.value,
+        p_adjusted = p.adjust(chisq_result$p.value, method = "bonferroni", n = n_comparisons),
+        Pct_YesDelta_Group1 = round(yes_delta_pct1, 2),
+        Pct_YesDelta_Group2 = round(yes_delta_pct2, 2),
+        stringsAsFactors = FALSE
+      ))
+    }
+  }
+  
+  # Add significance indicators
+  results$Significance <- ifelse(results$p_adjusted < 0.001, "***",
+                                ifelse(results$p_adjusted < 0.01, "**",
+                                      ifelse(results$p_adjusted < 0.05, "*", "ns")))
+  
+  return(results)
+}
+
+# Pairwise comparisons for suspense levels
+print("=== Pairwise comparisons for Suspense levels ===")
+suspense_pairwise <- perform_pairwise_chisq(df, "level_suspense", "persuasion_success")
+print(suspense_pairwise)
+
+# Pairwise comparisons for curiosity levels  
+print("=== Pairwise comparisons for Curiosity levels ===")
+curiosity_pairwise <- perform_pairwise_chisq(df, "level_curiosity", "persuasion_success")
+print(curiosity_pairwise)
+
+# Pairwise comparisons for surprise levels
+print("=== Pairwise comparisons for Surprise levels ===")
+surprise_pairwise <- perform_pairwise_chisq(df, "level_surprise", "persuasion_success")
+print(surprise_pairwise)
+
+# 3. MODEL COMPARISON AND SELECTION
+
+# Main effects only model
+main_model <- glm(persuasion_success ~ story_class + level_suspense + level_curiosity + level_surprise,
+                  family = binomial, data = df)
+
+full_model <- glm(persuasion_success ~ story_class + level_suspense + level_curiosity + level_surprise +                  story_class:level_suspense + story_class:level_curiosity + story_class:level_surprise, family = binomial, data = df)
+
+# Likelihood ratio test comparing models
+lr_test <- anova(main_model, full_model, test = "LRT")
+print("Likelihood Ratio Test - Main vs Full Model:")
+print(lr_test)
+
+# AIC/BIC comparison
+model_comparison <- data.frame(
+  Model = c("Main Effects", "Full Interactions"),
+  AIC = c(AIC(main_model), AIC(full_model)),
+  BIC = c(BIC(main_model), BIC(full_model)),
+  Deviance = c(deviance(main_model), deviance(full_model))
+)
+print("Model Comparison:")
+print(model_comparison)
+
+# 4. ADDRESSING MULTICOLLINEARITY - CENTERED VARIABLES
+
+# Create centered versions of variables for interactions
+df$story_numeric <- as.numeric(df$story_class) - 1  # 0/1 coding
+df$suspense_centered <- scale(as.numeric(df$level_suspense), center = TRUE, scale = FALSE)[,1]
+df$curiosity_centered <- scale(as.numeric(df$level_curiosity), center = TRUE, scale = FALSE)[,1]
+df$surprise_centered <- scale(as.numeric(df$level_surprise), center = TRUE, scale = FALSE)[,1]
+
+# Interaction model with centered variables
+centered_model <- glm(persuasion_success ~ story_class + level_suspense + level_curiosity + level_surprise +
+                      story_numeric:suspense_centered + story_numeric:curiosity_centered + story_numeric:surprise_centered,
+                      family = binomial, data = df)
+
+print("Centered Interaction Model Summary:")
+summary(centered_model)
+
+# Check VIF for centered model
+print("VIF for Centered Model:")
+print(vif(centered_model))
+
+# 5. FIRTH'S PENALIZED LIKELIHOOD REGRESSION
+
+# Firth's logistic regression to address separation issues
+firth_model <- logistf(persuasion_success ~ story_class + level_suspense + level_curiosity + level_surprise,
+                       data = df)
+
+print("Firth's Penalized Likelihood Regression:")
+summary(firth_model)
+
+# 6. EFFECT SIZE INTERPRETATION
+
+# Function to interpret Cramer's V effect sizes
+interpret_cramers_v <- function(v) {
+  case_when(
+    v < 0.1 ~ "Negligible",
+    v < 0.3 ~ "Small",
+    v < 0.5 ~ "Medium",
+    TRUE ~ "Large"
+  )
+}
+
+# Create effect size summary table
+effect_sizes <- data.frame(
+  Variable = c("Story Class", "Suspense Level", "Curiosity Level", "Surprise Level"),
+  Cramers_V = c(0.03876783, 0.02759249, 0.03657677, 0.02344496),
+  Interpretation = c(
+    interpret_cramers_v(0.03876783),
+    interpret_cramers_v(0.02759249),
+    interpret_cramers_v(0.03657677),
+    interpret_cramers_v(0.02344496)
+  )
+)
+
+print("Effect Size Interpretations:")
+print(effect_sizes)
+
+# 7. SIMPLIFIED MODEL WITHOUT PROBLEMATIC INTERACTIONS
+
+# Model without suspense interactions (due to high VIF)
+reduced_model <- glm(persuasion_success ~ story_class + level_suspense + level_curiosity + level_surprise +
+                     story_class:level_curiosity + story_class:level_surprise,
+                     family = binomial, data = df)
+
+print("Reduced Model (without suspense interactions):")
+summary(reduced_model)
+
+print("VIF for Reduced Model:")
+print(vif(reduced_model))
+
+# Compare reduced model to full model
+lr_test_reduced <- anova(reduced_model, full_model, test = "LRT")
+print("LR Test - Reduced vs Full Model:")
+print(lr_test_reduced)
+
+# 8. ADDITIONAL MODEL DIAGNOSTICS
+
+# Pseudo R-squared for models
+pseudo_r2 <- function(model) {
+  1 - (model$deviance / model$null.deviance)
+}
+
+print("Pseudo R-squared values:")
+print(paste("Main Model:", round(pseudo_r2(main_model), 4)))
+print(paste("Full Model:", round(pseudo_r2(full_model), 4)))
+print(paste("Reduced Model:", round(pseudo_r2(reduced_model), 4)))
+
+# Create summary table for all models
+model_summary_table <- data.frame(
+  Model = c("Main Effects", "Full Interactions", "Reduced Interactions"),
+  AIC = c(AIC(main_model), AIC(full_model), AIC(reduced_model)),
+  BIC = c(BIC(main_model), BIC(full_model), BIC(reduced_model)),
+  Pseudo_R2 = c(pseudo_r2(main_model), pseudo_r2(full_model), pseudo_r2(reduced_model)),
+  Max_VIF = c(max(vif(main_model)), max(vif(full_model)[,3]), max(vif(reduced_model)[,3]))
+)
+
+print("Complete Model Comparison Table:")
+print(model_summary_table)
 ```
