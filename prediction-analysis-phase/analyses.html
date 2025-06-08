@@ -1622,7 +1622,7 @@ display: none;
 
 <h1 class="title toc-ignore">Analyses</h1>
 <h4 class="author">Martijn Straatsburg</h4>
-<h4 class="date">Generation date: Jun 08, 2025 - 02:08:55</h4>
+<h4 class="date">Generation date: Jun 08, 2025 - 02:33:12</h4>
 
 </div>
 
@@ -1721,14 +1721,14 @@ knitr::kable(
 </tbody>
 </table>
 <pre class="r"><code>cat(
-  &quot;\nPearson χ² =&quot;, round(chisq_story$statistic, 3),
+  &quot;\nPearson Chi-Square =&quot;, round(chisq_story$statistic, 3),
   &quot;df =&quot;, chisq_story$parameter,
   &quot;p =&quot;, signif(chisq_story$p.value, 3), &quot;\n&quot;,
   &quot;Cramer’s V =&quot;, round(cramerv_story, 3),
   &quot;95% CI [&quot;, round(cramerv_ci[&quot;lwr.ci&quot;], 3), &quot;,&quot;, round(cramerv_ci[&quot;upr.ci&quot;], 3), &quot;]\n&quot;
 )</code></pre>
 <pre><code>## 
-## Pearson χ² = 145.74 df = 1 p = 1.48e-33 
+## Pearson Chi-Square = 145.74 df = 1 p = 1.48e-33 
 ##  Cramer’s V = 0.039 95% CI [ 0.032 , 0.045 ]</code></pre>
 <pre class="r"><code>#–– 2. Binary Suspense ––
 table_bin_susp &lt;- table(df$binary_suspense, df$persuasion_success)
@@ -1776,14 +1776,14 @@ knitr::kable(
 </tbody>
 </table>
 <pre class="r"><code>cat(
-  &quot;\nPearson χ² =&quot;, round(chi_bin_susp$statistic, 3),
+  &quot;\nPearson Chi-Square =&quot;, round(chi_bin_susp$statistic, 3),
   &quot;df =&quot;, chi_bin_susp$parameter,
   &quot;p =&quot;, signif(chi_bin_susp$p.value, 3), &quot;\n&quot;,
   &quot;Cramer’s V =&quot;, round(cramerv_susp, 3),
   &quot;95% CI [&quot;, round(cramerv_ci_s[&quot;lwr.ci&quot;], 3), &quot;,&quot;, round(cramerv_ci_s[&quot;upr.ci&quot;], 3), &quot;]\n&quot;
 )</code></pre>
 <pre><code>## 
-## Pearson χ² = 72.893 df = 1 p = 1.37e-17 
+## Pearson Chi-Square = 72.893 df = 1 p = 1.37e-17 
 ##  Cramer’s V = 0.027 95% CI [ 0.021 , 0.034 ]</code></pre>
 <pre class="r"><code>#–– 3. Binary Curiosity ––
 table_bin_cur  &lt;- table(df$binary_curiosity, df$persuasion_success)
@@ -1832,14 +1832,14 @@ Success</caption>
 </tbody>
 </table>
 <pre class="r"><code>cat(
-  &quot;\nPearson χ² =&quot;, round(chi_bin_cur$statistic, 3),
+  &quot;\nPearson Chi-Square =&quot;, round(chi_bin_cur$statistic, 3),
   &quot;df =&quot;, chi_bin_cur$parameter,
   &quot;p =&quot;, signif(chi_bin_cur$p.value, 3), &quot;\n&quot;,
   &quot;Cramer’s V =&quot;, round(cramerv_cur, 3),
   &quot;95% CI [&quot;, round(cramerv_ci_cur[&quot;lwr.ci&quot;], 3), &quot;,&quot;, round(cramerv_ci_cur[&quot;upr.ci&quot;], 3), &quot;]\n&quot;
 )</code></pre>
 <pre><code>## 
-## Pearson χ² = 123.044 df = 1 p = 1.36e-28 
+## Pearson Chi-Square = 123.044 df = 1 p = 1.36e-28 
 ##  Cramer’s V = 0.036 95% CI [ 0.029 , 0.042 ]</code></pre>
 <pre class="r"><code>#–– 4. Binary Surprise ––
 table_bin_sur  &lt;- table(df$binary_surprise, df$persuasion_success)
@@ -1887,14 +1887,14 @@ knitr::kable(
 </tbody>
 </table>
 <pre class="r"><code>cat(
-  &quot;\nPearson χ² =&quot;, round(chi_bin_sur$statistic, 3),
+  &quot;\nPearson Chi-Square =&quot;, round(chi_bin_sur$statistic, 3),
   &quot;df =&quot;, chi_bin_sur$parameter,
   &quot;p =&quot;, signif(chi_bin_sur$p.value, 3), &quot;\n&quot;,
   &quot;Cramer’s V =&quot;, round(cramerv_sur, 3),
   &quot;95% CI [&quot;, round(cramerv_ci_sur[&quot;lwr.ci&quot;], 3), &quot;,&quot;, round(cramerv_ci_sur[&quot;upr.ci&quot;], 3), &quot;]\n&quot;
 )</code></pre>
 <pre><code>## 
-## Pearson χ² = 34.807 df = 1 p = 3.64e-09 
+## Pearson Chi-Square = 34.807 df = 1 p = 3.64e-09 
 ##  Cramer’s V = 0.019 95% CI [ 0.013 , 0.025 ]</code></pre>
 <pre class="r"><code>#–– 6. Logistic Regression ––
 model_bin &lt;- glm(
@@ -2121,16 +2121,16 @@ CIs_i1 &lt;- exp(confint(model_inter1))</code></pre>
 </tr>
 </tbody>
 </table>
-<pre class="r"><code>ORs_i1 &lt;- exp(coef(model_inter2))
-CIs_i1 &lt;- exp(confint(model_inter2))</code></pre>
+<pre class="r"><code>ORs_i2 &lt;- exp(coef(model_inter2))
+CIs_i2 &lt;- exp(confint(model_inter2))</code></pre>
 <pre><code>## Waiting for profiling to be done...</code></pre>
 <pre class="r"><code>knitr::kable(
-  cbind(OR = ORs_i1, CI_low = CIs_i1[,1], CI_high = CIs_i1[,2]),
+  cbind(OR = ORs_i2, CI_low = CIs_i2[,1], CI_high = CIs_i2[,2]),
   digits = 3,
-  caption = &quot;Odds Ratios &amp; 95% CI, Interaction Model 1&quot;
+  caption = &quot;Odds Ratios &amp; 95% CI, Interaction Model 2&quot;
 )</code></pre>
 <table>
-<caption>Odds Ratios &amp; 95% CI, Interaction Model 1</caption>
+<caption>Odds Ratios &amp; 95% CI, Interaction Model 2</caption>
 <thead>
 <tr class="header">
 <th align="left"></th>

@@ -3,9 +3,9 @@ title: "Analyses"
 author: "Martijn Straatsburg"
 date: "Generation date: `r format(Sys.time(), '%b %d, %Y - %H:%M:%S')`"
 output:
-  pdf_document: default
   html_document:
     df_print: paged
+  pdf_document: default
   word_document: default
 ---
 
@@ -195,18 +195,20 @@ summary(model_inter2)
 
 ORs_i1 <- exp(coef(model_inter1))
 CIs_i1 <- exp(confint(model_inter1))
+
+
 knitr::kable(
   cbind(OR = ORs_i1, CI_low = CIs_i1[,1], CI_high = CIs_i1[,2]),
   digits = 3,
   caption = "Odds Ratios & 95% CI, Interaction Model 1"
 )
 
-ORs_i1 <- exp(coef(model_inter2))
-CIs_i1 <- exp(confint(model_inter2))
+ORs_i2 <- exp(coef(model_inter2))
+CIs_i2 <- exp(confint(model_inter2))
 knitr::kable(
-  cbind(OR = ORs_i1, CI_low = CIs_i1[,1], CI_high = CIs_i1[,2]),
+  cbind(OR = ORs_i2, CI_low = CIs_i2[,1], CI_high = CIs_i2[,2]),
   digits = 3,
-  caption = "Odds Ratios & 95% CI, Interaction Model 1"
+  caption = "Odds Ratios & 95% CI, Interaction Model 2"
 )
 
 anova_tab <- anova(
