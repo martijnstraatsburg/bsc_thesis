@@ -3,9 +3,10 @@ title: "Analyses"
 author: "Martijn Straatsburg"
 date: "Generation date: `r format(Sys.time(), '%b %d, %Y - %H:%M:%S')`"
 output:
+  pdf_document: default
   html_document:
     df_print: paged
-  pdf_document: default
+  word_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -30,6 +31,7 @@ suppressPackageStartupMessages(library(effects))
 suppressPackageStartupMessages(library(corrplot))
 suppressPackageStartupMessages(library(logistf))
 suppressPackageStartupMessages(library(RVAideMemoire))
+suppressPackageStartupMessages(library(rstatix))
 ```
 
 ## Data
@@ -60,7 +62,165 @@ df <- df %>%
 #str(df)
 ```
 
-## Story
+## NEW ANALYSES
+```{r, fig.width=10, fig.height=10}
+#–– 1. Story Class––
+table_story <- table(df$story_class, df$persuasion_success)
+chisq_story   <- chisq.test(table_story)
+cramerv_story <- assocstats(table_story)$cramer
+cramerv_ci    <- CramerV(table_story, conf.level = 0.95)
+
+knitr::kable(
+  cbind(
+    Count    = as.vector(table_story),
+    Expected = as.vector(chisq_story$expected),
+    `Prop`   = round(prop.table(table_story, 1) * 100, 2)
+  ),
+  caption = "Story Class × Persuasion Success"
+)
+cat(
+  "\nPearson Chi-Square =", round(chisq_story$statistic, 3),
+  "df =", chisq_story$parameter,
+  "p =", signif(chisq_story$p.value, 3), "\n",
+  "Cramer’s V =", round(cramerv_story, 3),
+  "95% CI [", round(cramerv_ci["lwr.ci"], 3), ",", round(cramerv_ci["upr.ci"], 3), "]\n"
+)
+
+#–– 2. Binary Suspense ––
+table_bin_susp <- table(df$binary_suspense, df$persuasion_success)
+chi_bin_susp   <- chisq.test(table_bin_susp)
+cramerv_susp   <- assocstats(table_bin_susp)$cramer
+cramerv_ci_s   <- CramerV(table_bin_susp, conf.level = 0.95)
+
+knitr::kable(
+  cbind(
+    Count    = as.vector(table_bin_susp),
+    Expected = as.vector(chi_bin_susp$expected),
+    `Prop`   = round(prop.table(table_bin_susp, 1) * 100, 2)
+  ),
+  caption = "Binary Suspense (Under/Over 2.5) × Persuasion Success"
+)
+cat(
+  "\nPearson Chi-Square =", round(chi_bin_susp$statistic, 3),
+  "df =", chi_bin_susp$parameter,
+  "p =", signif(chi_bin_susp$p.value, 3), "\n",
+  "Cramer’s V =", round(cramerv_susp, 3),
+  "95% CI [", round(cramerv_ci_s["lwr.ci"], 3), ",", round(cramerv_ci_s["upr.ci"], 3), "]\n"
+)
+
+#–– 3. Binary Curiosity ––
+table_bin_cur  <- table(df$binary_curiosity, df$persuasion_success)
+chi_bin_cur    <- chisq.test(table_bin_cur)
+cramerv_cur    <- assocstats(table_bin_cur)$cramer
+cramerv_ci_cur <- CramerV(table_bin_cur, conf.level = 0.95)
+
+knitr::kable(
+  cbind(
+    Count    = as.vector(table_bin_cur),
+    Expected = as.vector(chi_bin_cur$expected),
+    `Prop`   = round(prop.table(table_bin_cur, 1) * 100, 2)
+  ),
+  caption = "Binary Curiosity (Under/Over 2.5) × Persuasion Success"
+)
+cat(
+  "\nPearson Chi-Square =", round(chi_bin_cur$statistic, 3),
+  "df =", chi_bin_cur$parameter,
+  "p =", signif(chi_bin_cur$p.value, 3), "\n",
+  "Cramer’s V =", round(cramerv_cur, 3),
+  "95% CI [", round(cramerv_ci_cur["lwr.ci"], 3), ",", round(cramerv_ci_cur["upr.ci"], 3), "]\n"
+)
+
+#–– 4. Binary Surprise ––
+table_bin_sur  <- table(df$binary_surprise, df$persuasion_success)
+chi_bin_sur    <- chisq.test(table_bin_sur)
+cramerv_sur    <- assocstats(table_bin_sur)$cramer
+cramerv_ci_sur <- CramerV(table_bin_sur, conf.level = 0.95)
+
+knitr::kable(
+  cbind(
+    Count    = as.vector(table_bin_sur),
+    Expected = as.vector(chi_bin_sur$expected),
+    `Prop`   = round(prop.table(table_bin_sur, 1) * 100, 2)
+  ),
+  caption = "Binary Surprise (Under/Over 2.5) × Persuasion Success"
+)
+cat(
+  "\nPearson Chi-Square =", round(chi_bin_sur$statistic, 3),
+  "df =", chi_bin_sur$parameter,
+  "p =", signif(chi_bin_sur$p.value, 3), "\n",
+  "Cramer’s V =", round(cramerv_sur, 3),
+  "95% CI [", round(cramerv_ci_sur["lwr.ci"], 3), ",", round(cramerv_ci_sur["upr.ci"], 3), "]\n"
+)
+
+#–– 6. Logistic Regression ––
+model_bin <- glm(
+  persuasion_success ~ story_class +
+                       binary_suspense +
+                       binary_curiosity +
+                       binary_surprise,
+  data = df, family = binomial
+)
+summary(model_bin)
+
+ORs  <- exp(coef(model_bin))
+CIs  <- exp(confint(model_bin))
+knitr::kable(
+  cbind(OR=ORs, CI_low=CIs[,1], CI_high=CIs[,2]),
+  digits=3,
+  caption="Odds Ratios (Binary Predictors) with 95% CI"
+)
+
+#–– 8. Interaction Models––
+model_base <- glm(
+  persuasion_success ~ story_class +
+                       binary_suspense +
+                       binary_curiosity +
+                       binary_surprise,
+  data = df, family = binomial
+)
+
+model_inter1 <- update(
+  model_base,
+  . ~ . + story_class:binary_suspense + story_class:binary_curiosity + story_class:binary_surprise
+)
+
+model_inter2 <- glm(
+  persuasion_success ~ story_class *
+                       (binary_suspense + binary_curiosity + binary_surprise),
+  data = df, family = binomial
+)
+
+summary(model_inter1)
+summary(model_inter2)
+
+ORs_i1 <- exp(coef(model_inter1))
+CIs_i1 <- exp(confint(model_inter1))
+knitr::kable(
+  cbind(OR = ORs_i1, CI_low = CIs_i1[,1], CI_high = CIs_i1[,2]),
+  digits = 3,
+  caption = "Odds Ratios & 95% CI, Interaction Model 1"
+)
+
+ORs_i1 <- exp(coef(model_inter2))
+CIs_i1 <- exp(confint(model_inter2))
+knitr::kable(
+  cbind(OR = ORs_i1, CI_low = CIs_i1[,1], CI_high = CIs_i1[,2]),
+  digits = 3,
+  caption = "Odds Ratios & 95% CI, Interaction Model 1"
+)
+
+anova_tab <- anova(
+  model_base, model_inter1, model_inter2,
+  test = "Chisq"
+)
+knitr::kable(
+  anova_tab,
+  digits = c(NA, 0, 3, 3, 3),
+  caption = "Likelihood‐Ratio Tests: Base vs. Interaction Models"
+)
+```
+
+## OLD; INCLUDING ALL CODE BLOCKS AFTER THIS ONE
 ```{r, fig.width=10, fig.height=10}
 # contingency table
 (table_story <- table(df$story_class, df$persuasion_success))

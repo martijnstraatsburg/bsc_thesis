@@ -1622,7 +1622,7 @@ display: none;
 
 <h1 class="title toc-ignore">Analyses</h1>
 <h4 class="author">Martijn Straatsburg</h4>
-<h4 class="date">Generation date: May 29, 2025 - 22:05:41</h4>
+<h4 class="date">Generation date: Jun 08, 2025 - 02:08:55</h4>
 
 </div>
 
@@ -1643,7 +1643,8 @@ suppressPackageStartupMessages(library(reshape2))
 suppressPackageStartupMessages(library(effects))
 suppressPackageStartupMessages(library(corrplot))
 suppressPackageStartupMessages(library(logistf))
-suppressPackageStartupMessages(library(RVAideMemoire))</code></pre>
+suppressPackageStartupMessages(library(RVAideMemoire))
+suppressPackageStartupMessages(library(rstatix))</code></pre>
 </div>
 <div id="data" class="section level2">
 <h2>Data</h2>
@@ -1672,8 +1673,570 @@ df &lt;- df %&gt;%
   )
 #str(df)</code></pre>
 </div>
-<div id="story" class="section level2">
-<h2>Story</h2>
+<div id="new-analyses" class="section level2">
+<h2>NEW ANALYSES</h2>
+<pre class="r"><code>#–– 1. Story Class––
+table_story &lt;- table(df$story_class, df$persuasion_success)
+chisq_story   &lt;- chisq.test(table_story)
+cramerv_story &lt;- assocstats(table_story)$cramer
+cramerv_ci    &lt;- CramerV(table_story, conf.level = 0.95)
+
+knitr::kable(
+  cbind(
+    Count    = as.vector(table_story),
+    Expected = as.vector(chisq_story$expected),
+    `Prop`   = round(prop.table(table_story, 1) * 100, 2)
+  ),
+  caption = &quot;Story Class × Persuasion Success&quot;
+)</code></pre>
+<pre><code>## Warning in cbind(Count = as.vector(table_story), Expected =
+## as.vector(chisq_story$expected), : number of rows of result is not a multiple
+## of vector length (arg 1)</code></pre>
+<table>
+<caption>Story Class × Persuasion Success</caption>
+<thead>
+<tr class="header">
+<th align="left"></th>
+<th align="right">Count</th>
+<th align="right">Expected</th>
+<th align="right">No Delta</th>
+<th align="right">Yes Delta</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Not Story</td>
+<td align="right">82938</td>
+<td align="right">82775.16</td>
+<td align="right">98.61</td>
+<td align="right">1.39</td>
+</tr>
+<tr class="even">
+<td align="left">Story</td>
+<td align="right">13085</td>
+<td align="right">13247.84</td>
+<td align="right">97.21</td>
+<td align="right">2.79</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>cat(
+  &quot;\nPearson χ² =&quot;, round(chisq_story$statistic, 3),
+  &quot;df =&quot;, chisq_story$parameter,
+  &quot;p =&quot;, signif(chisq_story$p.value, 3), &quot;\n&quot;,
+  &quot;Cramer’s V =&quot;, round(cramerv_story, 3),
+  &quot;95% CI [&quot;, round(cramerv_ci[&quot;lwr.ci&quot;], 3), &quot;,&quot;, round(cramerv_ci[&quot;upr.ci&quot;], 3), &quot;]\n&quot;
+)</code></pre>
+<pre><code>## 
+## Pearson χ² = 145.74 df = 1 p = 1.48e-33 
+##  Cramer’s V = 0.039 95% CI [ 0.032 , 0.045 ]</code></pre>
+<pre class="r"><code>#–– 2. Binary Suspense ––
+table_bin_susp &lt;- table(df$binary_suspense, df$persuasion_success)
+chi_bin_susp   &lt;- chisq.test(table_bin_susp)
+cramerv_susp   &lt;- assocstats(table_bin_susp)$cramer
+cramerv_ci_s   &lt;- CramerV(table_bin_susp, conf.level = 0.95)
+
+knitr::kable(
+  cbind(
+    Count    = as.vector(table_bin_susp),
+    Expected = as.vector(chi_bin_susp$expected),
+    `Prop`   = round(prop.table(table_bin_susp, 1) * 100, 2)
+  ),
+  caption = &quot;Binary Suspense (Under/Over 2.5) × Persuasion Success&quot;
+)</code></pre>
+<pre><code>## Warning in cbind(Count = as.vector(table_bin_susp), Expected =
+## as.vector(chi_bin_susp$expected), : number of rows of result is not a multiple
+## of vector length (arg 1)</code></pre>
+<table>
+<caption>Binary Suspense (Under/Over 2.5) × Persuasion Success</caption>
+<thead>
+<tr class="header">
+<th align="left"></th>
+<th align="right">Count</th>
+<th align="right">Expected</th>
+<th align="right">No Delta</th>
+<th align="right">Yes Delta</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">under</td>
+<td align="right">89004</td>
+<td align="right">88916.345</td>
+<td align="right">98.51</td>
+<td align="right">1.49</td>
+</tr>
+<tr class="even">
+<td align="left">over</td>
+<td align="right">7019</td>
+<td align="right">7106.655</td>
+<td align="right">97.20</td>
+<td align="right">2.80</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>cat(
+  &quot;\nPearson χ² =&quot;, round(chi_bin_susp$statistic, 3),
+  &quot;df =&quot;, chi_bin_susp$parameter,
+  &quot;p =&quot;, signif(chi_bin_susp$p.value, 3), &quot;\n&quot;,
+  &quot;Cramer’s V =&quot;, round(cramerv_susp, 3),
+  &quot;95% CI [&quot;, round(cramerv_ci_s[&quot;lwr.ci&quot;], 3), &quot;,&quot;, round(cramerv_ci_s[&quot;upr.ci&quot;], 3), &quot;]\n&quot;
+)</code></pre>
+<pre><code>## 
+## Pearson χ² = 72.893 df = 1 p = 1.37e-17 
+##  Cramer’s V = 0.027 95% CI [ 0.021 , 0.034 ]</code></pre>
+<pre class="r"><code>#–– 3. Binary Curiosity ––
+table_bin_cur  &lt;- table(df$binary_curiosity, df$persuasion_success)
+chi_bin_cur    &lt;- chisq.test(table_bin_cur)
+cramerv_cur    &lt;- assocstats(table_bin_cur)$cramer
+cramerv_ci_cur &lt;- CramerV(table_bin_cur, conf.level = 0.95)
+
+knitr::kable(
+  cbind(
+    Count    = as.vector(table_bin_cur),
+    Expected = as.vector(chi_bin_cur$expected),
+    `Prop`   = round(prop.table(table_bin_cur, 1) * 100, 2)
+  ),
+  caption = &quot;Binary Curiosity (Under/Over 2.5) × Persuasion Success&quot;
+)</code></pre>
+<pre><code>## Warning in cbind(Count = as.vector(table_bin_cur), Expected =
+## as.vector(chi_bin_cur$expected), : number of rows of result is not a multiple
+## of vector length (arg 1)</code></pre>
+<table>
+<caption>Binary Curiosity (Under/Over 2.5) × Persuasion
+Success</caption>
+<thead>
+<tr class="header">
+<th align="left"></th>
+<th align="right">Count</th>
+<th align="right">Expected</th>
+<th align="right">No Delta</th>
+<th align="right">Yes Delta</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">under</td>
+<td align="right">77427</td>
+<td align="right">77254.98</td>
+<td align="right">98.64</td>
+<td align="right">1.36</td>
+</tr>
+<tr class="even">
+<td align="left">over</td>
+<td align="right">18596</td>
+<td align="right">18768.02</td>
+<td align="right">97.51</td>
+<td align="right">2.49</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>cat(
+  &quot;\nPearson χ² =&quot;, round(chi_bin_cur$statistic, 3),
+  &quot;df =&quot;, chi_bin_cur$parameter,
+  &quot;p =&quot;, signif(chi_bin_cur$p.value, 3), &quot;\n&quot;,
+  &quot;Cramer’s V =&quot;, round(cramerv_cur, 3),
+  &quot;95% CI [&quot;, round(cramerv_ci_cur[&quot;lwr.ci&quot;], 3), &quot;,&quot;, round(cramerv_ci_cur[&quot;upr.ci&quot;], 3), &quot;]\n&quot;
+)</code></pre>
+<pre><code>## 
+## Pearson χ² = 123.044 df = 1 p = 1.36e-28 
+##  Cramer’s V = 0.036 95% CI [ 0.029 , 0.042 ]</code></pre>
+<pre class="r"><code>#–– 4. Binary Surprise ––
+table_bin_sur  &lt;- table(df$binary_surprise, df$persuasion_success)
+chi_bin_sur    &lt;- chisq.test(table_bin_sur)
+cramerv_sur    &lt;- assocstats(table_bin_sur)$cramer
+cramerv_ci_sur &lt;- CramerV(table_bin_sur, conf.level = 0.95)
+
+knitr::kable(
+  cbind(
+    Count    = as.vector(table_bin_sur),
+    Expected = as.vector(chi_bin_sur$expected),
+    `Prop`   = round(prop.table(table_bin_sur, 1) * 100, 2)
+  ),
+  caption = &quot;Binary Surprise (Under/Over 2.5) × Persuasion Success&quot;
+)</code></pre>
+<pre><code>## Warning in cbind(Count = as.vector(table_bin_sur), Expected =
+## as.vector(chi_bin_sur$expected), : number of rows of result is not a multiple
+## of vector length (arg 1)</code></pre>
+<table>
+<caption>Binary Surprise (Under/Over 2.5) × Persuasion Success</caption>
+<thead>
+<tr class="header">
+<th align="left"></th>
+<th align="right">Count</th>
+<th align="right">Expected</th>
+<th align="right">No Delta</th>
+<th align="right">Yes Delta</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">under</td>
+<td align="right">87416</td>
+<td align="right">87349.555</td>
+<td align="right">98.49</td>
+<td align="right">1.51</td>
+</tr>
+<tr class="even">
+<td align="left">over</td>
+<td align="right">8607</td>
+<td align="right">8673.445</td>
+<td align="right">97.66</td>
+<td align="right">2.34</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>cat(
+  &quot;\nPearson χ² =&quot;, round(chi_bin_sur$statistic, 3),
+  &quot;df =&quot;, chi_bin_sur$parameter,
+  &quot;p =&quot;, signif(chi_bin_sur$p.value, 3), &quot;\n&quot;,
+  &quot;Cramer’s V =&quot;, round(cramerv_sur, 3),
+  &quot;95% CI [&quot;, round(cramerv_ci_sur[&quot;lwr.ci&quot;], 3), &quot;,&quot;, round(cramerv_ci_sur[&quot;upr.ci&quot;], 3), &quot;]\n&quot;
+)</code></pre>
+<pre><code>## 
+## Pearson χ² = 34.807 df = 1 p = 3.64e-09 
+##  Cramer’s V = 0.019 95% CI [ 0.013 , 0.025 ]</code></pre>
+<pre class="r"><code>#–– 6. Logistic Regression ––
+model_bin &lt;- glm(
+  persuasion_success ~ story_class +
+                       binary_suspense +
+                       binary_curiosity +
+                       binary_surprise,
+  data = df, family = binomial
+)
+summary(model_bin)</code></pre>
+<pre><code>## 
+## Call:
+## glm(formula = persuasion_success ~ story_class + binary_suspense + 
+##     binary_curiosity + binary_surprise, family = binomial, data = df)
+## 
+## Coefficients:
+##                      Estimate Std. Error  z value Pr(&gt;|z|)    
+## (Intercept)          -4.29466    0.03099 -138.586  &lt; 2e-16 ***
+## story_classStory      0.46297    0.10405    4.450 8.60e-06 ***
+## binary_suspenseover   0.13938    0.10733    1.299   0.1941    
+## binary_curiosityover  0.34706    0.07984    4.347 1.38e-05 ***
+## binary_surpriseover  -0.18474    0.09736   -1.898   0.0577 .  
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 15875  on 97567  degrees of freedom
+## Residual deviance: 15731  on 97563  degrees of freedom
+## AIC: 15741
+## 
+## Number of Fisher Scoring iterations: 7</code></pre>
+<pre class="r"><code>ORs  &lt;- exp(coef(model_bin))
+CIs  &lt;- exp(confint(model_bin))</code></pre>
+<pre><code>## Waiting for profiling to be done...</code></pre>
+<pre class="r"><code>knitr::kable(
+  cbind(OR=ORs, CI_low=CIs[,1], CI_high=CIs[,2]),
+  digits=3,
+  caption=&quot;Odds Ratios (Binary Predictors) with 95% CI&quot;
+)</code></pre>
+<table>
+<caption>Odds Ratios (Binary Predictors) with 95% CI</caption>
+<thead>
+<tr class="header">
+<th align="left"></th>
+<th align="right">OR</th>
+<th align="right">CI_low</th>
+<th align="right">CI_high</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">(Intercept)</td>
+<td align="right">0.014</td>
+<td align="right">0.013</td>
+<td align="right">0.014</td>
+</tr>
+<tr class="even">
+<td align="left">story_classStory</td>
+<td align="right">1.589</td>
+<td align="right">1.294</td>
+<td align="right">1.947</td>
+</tr>
+<tr class="odd">
+<td align="left">binary_suspenseover</td>
+<td align="right">1.150</td>
+<td align="right">0.931</td>
+<td align="right">1.419</td>
+</tr>
+<tr class="even">
+<td align="left">binary_curiosityover</td>
+<td align="right">1.415</td>
+<td align="right">1.208</td>
+<td align="right">1.652</td>
+</tr>
+<tr class="odd">
+<td align="left">binary_surpriseover</td>
+<td align="right">0.831</td>
+<td align="right">0.686</td>
+<td align="right">1.005</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>#–– 8. Interaction Models––
+model_base &lt;- glm(
+  persuasion_success ~ story_class +
+                       binary_suspense +
+                       binary_curiosity +
+                       binary_surprise,
+  data = df, family = binomial
+)
+
+model_inter1 &lt;- update(
+  model_base,
+  . ~ . + story_class:binary_suspense + story_class:binary_curiosity + story_class:binary_surprise
+)
+
+model_inter2 &lt;- glm(
+  persuasion_success ~ story_class *
+                       (binary_suspense + binary_curiosity + binary_surprise),
+  data = df, family = binomial
+)
+
+summary(model_inter1)</code></pre>
+<pre><code>## 
+## Call:
+## glm(formula = persuasion_success ~ story_class + binary_suspense + 
+##     binary_curiosity + binary_surprise + story_class:binary_suspense + 
+##     story_class:binary_curiosity + story_class:binary_surprise, 
+##     family = binomial, data = df)
+## 
+## Coefficients:
+##                                       Estimate Std. Error  z value Pr(&gt;|z|)    
+## (Intercept)                           -4.29045    0.03144 -136.458  &lt; 2e-16 ***
+## story_classStory                       0.38258    0.17969    2.129 0.033243 *  
+## binary_suspenseover                    0.54013    0.43012    1.256 0.209201    
+## binary_curiosityover                   0.35177    0.09310    3.778 0.000158 ***
+## binary_surpriseover                   -0.50651    0.23459   -2.159 0.030841 *  
+## story_classStory:binary_suspenseover  -0.43289    0.44434   -0.974 0.329938    
+## story_classStory:binary_curiosityover  0.05749    0.19303    0.298 0.765832    
+## story_classStory:binary_surpriseover   0.39985    0.25927    1.542 0.123015    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 15875  on 97567  degrees of freedom
+## Residual deviance: 15728  on 97560  degrees of freedom
+## AIC: 15744
+## 
+## Number of Fisher Scoring iterations: 7</code></pre>
+<pre class="r"><code>summary(model_inter2)</code></pre>
+<pre><code>## 
+## Call:
+## glm(formula = persuasion_success ~ story_class * (binary_suspense + 
+##     binary_curiosity + binary_surprise), family = binomial, data = df)
+## 
+## Coefficients:
+##                                       Estimate Std. Error  z value Pr(&gt;|z|)    
+## (Intercept)                           -4.29045    0.03144 -136.458  &lt; 2e-16 ***
+## story_classStory                       0.38258    0.17969    2.129 0.033243 *  
+## binary_suspenseover                    0.54013    0.43012    1.256 0.209201    
+## binary_curiosityover                   0.35177    0.09310    3.778 0.000158 ***
+## binary_surpriseover                   -0.50651    0.23459   -2.159 0.030841 *  
+## story_classStory:binary_suspenseover  -0.43289    0.44434   -0.974 0.329938    
+## story_classStory:binary_curiosityover  0.05749    0.19303    0.298 0.765832    
+## story_classStory:binary_surpriseover   0.39985    0.25927    1.542 0.123015    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 15875  on 97567  degrees of freedom
+## Residual deviance: 15728  on 97560  degrees of freedom
+## AIC: 15744
+## 
+## Number of Fisher Scoring iterations: 7</code></pre>
+<pre class="r"><code>ORs_i1 &lt;- exp(coef(model_inter1))
+CIs_i1 &lt;- exp(confint(model_inter1))</code></pre>
+<pre><code>## Waiting for profiling to be done...</code></pre>
+<pre class="r"><code>knitr::kable(
+  cbind(OR = ORs_i1, CI_low = CIs_i1[,1], CI_high = CIs_i1[,2]),
+  digits = 3,
+  caption = &quot;Odds Ratios &amp; 95% CI, Interaction Model 1&quot;
+)</code></pre>
+<table>
+<caption>Odds Ratios &amp; 95% CI, Interaction Model 1</caption>
+<thead>
+<tr class="header">
+<th align="left"></th>
+<th align="right">OR</th>
+<th align="right">CI_low</th>
+<th align="right">CI_high</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">(Intercept)</td>
+<td align="right">0.014</td>
+<td align="right">0.013</td>
+<td align="right">0.015</td>
+</tr>
+<tr class="even">
+<td align="left">story_classStory</td>
+<td align="right">1.466</td>
+<td align="right">1.017</td>
+<td align="right">2.060</td>
+</tr>
+<tr class="odd">
+<td align="left">binary_suspenseover</td>
+<td align="right">1.716</td>
+<td align="right">0.660</td>
+<td align="right">3.668</td>
+</tr>
+<tr class="even">
+<td align="left">binary_curiosityover</td>
+<td align="right">1.422</td>
+<td align="right">1.180</td>
+<td align="right">1.700</td>
+</tr>
+<tr class="odd">
+<td align="left">binary_surpriseover</td>
+<td align="right">0.603</td>
+<td align="right">0.369</td>
+<td align="right">0.930</td>
+</tr>
+<tr class="even">
+<td align="left">story_classStory:binary_suspenseover</td>
+<td align="right">0.649</td>
+<td align="right">0.293</td>
+<td align="right">1.724</td>
+</tr>
+<tr class="odd">
+<td align="left">story_classStory:binary_curiosityover</td>
+<td align="right">1.059</td>
+<td align="right">0.733</td>
+<td align="right">1.564</td>
+</tr>
+<tr class="even">
+<td align="left">story_classStory:binary_surpriseover</td>
+<td align="right">1.492</td>
+<td align="right">0.916</td>
+<td align="right">2.542</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>ORs_i1 &lt;- exp(coef(model_inter2))
+CIs_i1 &lt;- exp(confint(model_inter2))</code></pre>
+<pre><code>## Waiting for profiling to be done...</code></pre>
+<pre class="r"><code>knitr::kable(
+  cbind(OR = ORs_i1, CI_low = CIs_i1[,1], CI_high = CIs_i1[,2]),
+  digits = 3,
+  caption = &quot;Odds Ratios &amp; 95% CI, Interaction Model 1&quot;
+)</code></pre>
+<table>
+<caption>Odds Ratios &amp; 95% CI, Interaction Model 1</caption>
+<thead>
+<tr class="header">
+<th align="left"></th>
+<th align="right">OR</th>
+<th align="right">CI_low</th>
+<th align="right">CI_high</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">(Intercept)</td>
+<td align="right">0.014</td>
+<td align="right">0.013</td>
+<td align="right">0.015</td>
+</tr>
+<tr class="even">
+<td align="left">story_classStory</td>
+<td align="right">1.466</td>
+<td align="right">1.017</td>
+<td align="right">2.060</td>
+</tr>
+<tr class="odd">
+<td align="left">binary_suspenseover</td>
+<td align="right">1.716</td>
+<td align="right">0.660</td>
+<td align="right">3.668</td>
+</tr>
+<tr class="even">
+<td align="left">binary_curiosityover</td>
+<td align="right">1.422</td>
+<td align="right">1.180</td>
+<td align="right">1.700</td>
+</tr>
+<tr class="odd">
+<td align="left">binary_surpriseover</td>
+<td align="right">0.603</td>
+<td align="right">0.369</td>
+<td align="right">0.930</td>
+</tr>
+<tr class="even">
+<td align="left">story_classStory:binary_suspenseover</td>
+<td align="right">0.649</td>
+<td align="right">0.293</td>
+<td align="right">1.724</td>
+</tr>
+<tr class="odd">
+<td align="left">story_classStory:binary_curiosityover</td>
+<td align="right">1.059</td>
+<td align="right">0.733</td>
+<td align="right">1.564</td>
+</tr>
+<tr class="even">
+<td align="left">story_classStory:binary_surpriseover</td>
+<td align="right">1.492</td>
+<td align="right">0.916</td>
+<td align="right">2.542</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>anova_tab &lt;- anova(
+  model_base, model_inter1, model_inter2,
+  test = &quot;Chisq&quot;
+)
+knitr::kable(
+  anova_tab,
+  digits = c(NA, 0, 3, 3, 3),
+  caption = &quot;Likelihood‐Ratio Tests: Base vs. Interaction Models&quot;
+)</code></pre>
+<table>
+<caption>Likelihood‐Ratio Tests: Base vs. Interaction Models</caption>
+<thead>
+<tr class="header">
+<th align="right">Resid. Df</th>
+<th align="right">Resid. Dev</th>
+<th align="right">Df</th>
+<th align="right">Deviance</th>
+<th align="right">Pr(&gt;Chi)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">NA</td>
+<td align="right">15731</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+</tr>
+<tr class="even">
+<td align="right">NA</td>
+<td align="right">15728</td>
+<td align="right">3</td>
+<td align="right">3.087</td>
+<td align="right">0.378</td>
+</tr>
+<tr class="odd">
+<td align="right">NA</td>
+<td align="right">15728</td>
+<td align="right">0</td>
+<td align="right">0.000</td>
+<td align="right">NA</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="old-including-all-code-blocks-after-this-one" class="section level2">
+<h2>OLD; INCLUDING ALL CODE BLOCKS AFTER THIS ONE</h2>
 <pre class="r"><code># contingency table
 (table_story &lt;- table(df$story_class, df$persuasion_success))</code></pre>
 <pre><code>##            
